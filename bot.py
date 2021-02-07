@@ -28,10 +28,9 @@ async def on_message(message):
     # setup permissions
     roles = ['Execs', 'Marketing', 'Digital', 'axie'] + [portfolio]
     roles = [role for role in server.roles if role.name in roles]
-    permissions = {role: discord.PermissionOverwrite(read_messages=True) for role in roles} | {
-        server.default_role: discord.PermissionOverwrite(read_messages=False),
-        server.me: discord.PermissionOverwrite(read_messages=True),
-    }
+    permissions = {role: discord.PermissionOverwrite(read_messages=True) for role in roles}
+    permissions[server.default_role] = discord.PermissionOverwrite(read_messages=False)
+    permissions[server.me] = discord.PermissionOverwrite(read_messages=True)
 
     # create new channel
     category = get(server.categories, name='🍺-Events')
