@@ -14,3 +14,5 @@ General Setup:
 1. Add your bot token to a .env file as an environment variable (aka TOKEN=...)
 1. Create a category `🍺-Events` with a `#requests` text channel inside it (text channel hidden by default)
 1. Setup a [Google Form to Discord Webhook](https://github.com/axieax/google-forms-to-discord) in `#requests`, linked to the DigiSoc Marketing Request Form
+
+[General Use Guide](https://docs.google.com/document/d/1CjqG-T6C-L2xN3P-3XGgtnQa0eK4q2nDHJ9a43flb0M/edit?fbclid=IwAR0X4ZELn87vzk-IXH8cyNvVuvcrerpmwuMk-oyJWLOhQ9kJrnk_is8hJlw)
