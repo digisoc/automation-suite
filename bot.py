@@ -50,16 +50,22 @@ async def push_request(message):
     portfolio = embed.fields[2].value
     event_name = '-'.join(embed.fields[4].value.split())
 
-    # setup permissions
+    # setup permissions for roles (execs able to manage permissions)
     roles = ['Execs', 'Marketing', 'Digital', 'axie'] + [portfolio]
-    roles = [role for role in server.roles if role.name in roles]
+    roles = [get(server.roles, name=role) for role in roles]
+
     permissions = {role: discord.PermissionOverwrite(read_messages=True) for role in roles}
+    permissions[roles[0]] = discord.PermissionOverwrite(manage_permissions=True)
     permissions[server.default_role] = discord.PermissionOverwrite(read_messages=False)
     permissions[server.me] = discord.PermissionOverwrite(read_messages=True)
 
-    # create new channel
+    # create new channel under events category
     category = get(server.categories, name='🍺-Events')
-    new_channel = await category.create_text_channel(name=event_name, overwrites=permissions)
+    new_channel = await category.create_text_channel(
+        name=event_name,
+        overwrites=permissions,
+        topic='Ask execs to invite extra members if required | !archive to destroy channel (execs only)',
+    )
 
     # forward google forms to discord notification embed
     status = f'A new channel has been automatically setup for {embed.fields[4].value}!'
@@ -71,6 +77,7 @@ async def push_request(message):
 async def on_message(message):
     # respond to messages from the #request channel
     channel = message.channel
+    user_roles = [role.name for role in message.author.roles]
     if channel.name == 'requests':
         # redo push request for referenced message
         if message.content == '!redo' and message.reference:
@@ -80,7 +87,7 @@ async def on_message(message):
         elif message.author.bot and message.author != client.user:
             await push_request(message)
             await message.add_reaction('✅')
-    elif message.content == '!archive' and str(message.author) == 'axieax#8240':
+    elif message.content == '!archive' and 'Execs' in user_roles:
         # extract channel content
         content = await archive_channel_content(channel)
         # write to file
@@ -95,7 +102,9 @@ async def on_message(message):
         with open(file_name, 'r') as f:
             await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
         print(status)
-        await message.add_reaction('✅')
+        # delete event channel
+        channel.delete(reason='Archived (check #requests)')
+        print('Channel deleted')
 
 
 if __name__ == '__main__':
