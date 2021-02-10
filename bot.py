@@ -93,7 +93,7 @@ async def on_message(message):
         requests_channel = get(message.guild.channels, name='requests')
         status = f'Archive successfully generated for {channel.name}'
         with open(file_name, 'r') as f:
-          await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
+            await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
         print(status)
         await message.add_reaction('✅')
 
