@@ -12,12 +12,37 @@ async def on_ready():
     print(f'{client.user} online')
 
 
-@client.event
-async def on_message(message):
-    # respond to messages from the #request channel
-    if message.channel.name != 'requests':
-        return
+async def archive_channel_content(channel):
+    '''
+    Extracts and returns channel history as a string
+    '''
+    messages = await channel.history().flatten()
+    history_string = channel.name + '\n'
+    for message in messages[::-1]:
+        # extract message info
+        history_string += f'\n{message.author} {message.created_at}'
+        history_string += f'\n{message.clean_content}'
+        # extract message attachments (files and images)
+        if message.attachments:
+            history_string += f'\nAttachments:'
+            for attachment in message.attachments:
+                history_string += f'\n\t{attachment.url}'
+        # extract message embeds
+        if message.embeds:
+            history_string += f'\nEmbeds:'
+            for embed in message.embeds:
+                history_string += f'\n{embed.title}'
+            for field in embed.fields:
+                history_string += f'\n{field.name}'
+                history_string += f'\n{field.value}\n'
+        history_string += '\n'
+    return history_string
 
+
+async def push_request(message):
+    '''
+    Sets up a new channel for new requests
+    '''
     # retrieve data
     server = message.guild
     embed = message.embeds[0]
@@ -40,6 +65,37 @@ async def on_message(message):
     status = f'A new channel has been automatically setup for {embed.fields[4].value}!'
     await new_channel.send(content=status, embed=embed)
     print(status)
+
+
+@client.event
+async def on_message(message):
+    # respond to messages from the #request channel
+    channel = message.channel
+    if channel.name == 'requests':
+        # redo push request for referenced message
+        if message.content == '!redo' and message.reference:
+            await push_request(message.reference.resolved)
+            await message.add_reaction('✅')
+        # push request to new channel
+        elif message.author.bot and message.author != client.user:
+            await push_request(message)
+            await message.add_reaction('✅')
+    elif message.content == '!archive' and str(message.author) == 'axieax#8240':
+        # extract channel content
+        content = await archive_channel_content(channel)
+        # write to file
+        file_name = f'./archives/{channel.name}'
+        if not os.path.exists('./archives'):
+            os.makedirs('./archives')
+        with open(file_name, 'w') as f:
+            f.write(content)
+        # post file to #requests
+        requests_channel = get(message.guild.channels, name='requests')
+        status = f'Archive successfully generated for {channel.name}'
+        with open(file_name, 'r') as f:
+          await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
+        print(status)
+        await message.add_reaction('✅')
 
 
 if __name__ == '__main__':
