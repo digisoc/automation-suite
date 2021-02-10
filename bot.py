@@ -51,11 +51,11 @@ async def push_request(message):
     event_name = '-'.join(embed.fields[4].value.split())
 
     # setup permissions for roles (execs able to manage permissions)
-    roles = ['Execs', 'Marketing', 'Digital', 'axie'] + [portfolio]
+    roles = ['Execs', 'Marketing', 'Digital', 'axie', portfolio]
     roles = [get(server.roles, name=role) for role in roles]
 
     permissions = {role: discord.PermissionOverwrite(read_messages=True) for role in roles}
-    permissions[roles[0]] = discord.PermissionOverwrite(manage_permissions=True)
+    permissions[roles[0]] = discord.PermissionOverwrite(read_messages=True, manage_permissions=True)
     permissions[server.default_role] = discord.PermissionOverwrite(read_messages=False)
     permissions[server.me] = discord.PermissionOverwrite(read_messages=True)
 
@@ -87,7 +87,7 @@ async def on_message(message):
         elif message.author.bot and message.author != client.user:
             await push_request(message)
             await message.add_reaction('✅')
-    elif message.content == '!archive' and 'Execs' in user_roles:
+    elif message.content == '!archive' and ('Execs' in user_roles or str(message.author) == 'axieax#8240'):
         # extract channel content
         content = await archive_channel_content(channel)
         # write to file
@@ -103,7 +103,7 @@ async def on_message(message):
             await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
         print(status)
         # delete event channel
-        channel.delete(reason='Archived (check #requests)')
+        await channel.delete(reason='Archived (check #requests)')
         print('Channel deleted')
 
 
