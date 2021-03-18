@@ -51,7 +51,9 @@ async def push_request(message):
     event_name = '-'.join(embed.fields[4].value.split())
 
     # setup permissions for roles (execs able to manage permissions)
-    roles = ['Execs', 'Marketing', 'Digital', 'axie', portfolio]
+    roles = ['Execs', 'Marketing', 'Digital', 'axie']
+    if portfolio != 'N/A':
+        roles.append(portfolio)
     roles = [get(server.roles, name=role) for role in roles]
 
     permissions = {role: discord.PermissionOverwrite(read_messages=True) for role in roles}
@@ -77,7 +79,8 @@ async def push_request(message):
 async def on_message(message):
     # respond to messages from the #request channel
     channel = message.channel
-    user_roles = [role.name for role in message.author.roles]
+    if not message.author.bot:
+        user_roles = [role.name for role in message.author.roles]
     if channel.name == 'requests':
         # redo push request for referenced message
         if message.content == '!redo' and message.reference:
