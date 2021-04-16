@@ -77,37 +77,48 @@ async def push_request(message):
 
 @client.event
 async def on_message(message):
-    # respond to messages from the #request channel
-    channel = message.channel
-    if not message.author.bot:
-        user_roles = [role.name for role in message.author.roles]
-    if channel.name == 'requests':
-        # redo push request for referenced message
-        if message.content == '!redo' and message.reference:
-            await push_request(message.reference.resolved)
-            await message.add_reaction('✅')
-        # push request to new channel
-        elif message.author.bot and message.author != client.user:
-            await push_request(message)
-            await message.add_reaction('✅')
-    elif message.content == '!archive' and ('Execs' in user_roles or str(message.author) == 'axieax#8240'):
-        # extract channel content
-        content = await archive_channel_content(channel)
-        # write to file
-        file_name = f'./archives/{channel.name}'
-        if not os.path.exists('./archives'):
-            os.makedirs('./archives')
-        with open(file_name, 'w') as f:
-            f.write(content)
-        # post file to #requests
-        requests_channel = get(message.guild.channels, name='requests')
-        status = f'Archive successfully generated for {channel.name}'
-        with open(file_name, 'r') as f:
-            await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
-        print(status)
-        # delete event channel
-        await channel.delete(reason='Archived (check #requests)')
-        print('Channel deleted')
+    try:
+        channel = message.channel
+        # ignore bot messages
+        if message.author.bot:
+            return
+        # ping command
+        if message.content == '!beep':
+            await channel.send(content='boop!')
+            return
+        # respond to messages from the #request channel
+        if not message.author.bot:
+            user_roles = [role.name for role in message.author.roles]
+        if channel.name == 'requests':
+            # redo push request for referenced message
+            if message.content == '!redo' and message.reference:
+                await push_request(message.reference.resolved)
+                await message.add_reaction('✅')
+            # push request to new channel
+            elif message.author.bot and message.author != client.user:
+                await push_request(message)
+                await message.add_reaction('✅')
+        elif message.content == '!archive' and ('Execs' in user_roles or str(message.author) == 'axieax#8240'):
+            # extract channel content
+            content = await archive_channel_content(channel)
+            # write to file
+            file_name = f'./archives/{channel.name}'
+            if not os.path.exists('./archives'):
+                os.makedirs('./archives')
+            with open(file_name, 'w') as f:
+                f.write(content)
+            # post file to #requests
+            requests_channel = get(message.guild.channels, name='requests')
+            status = f'Archive successfully generated for {channel.name}'
+            with open(file_name, 'r') as f:
+                await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
+            print(status)
+            # delete event channel
+            await channel.delete(reason='Archived (check #requests)')
+            print('Channel deleted')
+    except Exception as e:
+        await channel.send(e)
+
 
 
 if __name__ == '__main__':
