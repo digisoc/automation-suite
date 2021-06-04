@@ -71,7 +71,16 @@ async def push_request(message):
 
     # forward google forms to discord notification embed
     status = f'A new channel has been automatically setup for {embed.fields[4].value}!'
-    await new_channel.send(content=status, embed=embed)
+    forwarded_message = await new_channel.send(content=status, embed=embed)
+
+    # forward registration and attendance forms
+    form_details = message.content
+    form_message = await new_channel.send(content=form_details)
+    
+    # pin messages
+    await forwarded_message.pin()
+    await form_message.pin()
+
     print(status)
 
 
@@ -79,9 +88,6 @@ async def push_request(message):
 async def on_message(message):
     try:
         channel = message.channel
-        # ignore bot messages
-        if message.author.bot:
-            return
         # ping command
         if message.content == '!beep':
             await channel.send(content='boop!')
