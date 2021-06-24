@@ -69,17 +69,12 @@ async def push_request(message):
         topic='Ask execs to invite extra members if required | !archive to destroy channel (execs only)',
     )
 
-    # forward google forms to discord notification embed
-    status = f'A new channel has been automatically setup for {embed.fields[4].value}!'
-    forwarded_message = await new_channel.send(content=status, embed=embed)
-
-    # forward registration and attendance forms
+    # forward google forms to discord notification embed and created forms
     form_details = message.content
-    form_message = await new_channel.send(content=form_details)
-    
-    # pin messages
+    status = f'A new channel has been automatically setup for {embed.fields[4].value}!'
+    status += '\n' + form_details
+    forwarded_message = await new_channel.send(content=status, embed=embed)
     await forwarded_message.pin()
-    await form_message.pin()
 
     print(status)
 
