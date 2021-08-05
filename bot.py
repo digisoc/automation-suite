@@ -102,8 +102,8 @@ async def on_message(message):
         elif message.content == '!archive' and ('Execs' in user_roles or str(message.author) == 'axieax#8240'):
             # extract channel content
             content = await archive_channel_content(channel)
-            # write to file
-            file_name = f'./archives/{channel.name}'
+            # write to file (WARNING: this is insecure)
+            file_name = f'./archives/{channel.name}-archive.txt'
             if not os.path.exists('./archives'):
                 os.makedirs('./archives')
             with open(file_name, 'w') as f:
@@ -112,9 +112,8 @@ async def on_message(message):
             requests_channel = get(message.guild.channels, name='requests')
             archive_channel = get(message.guild.channels, name='archives')
             status = f'Archive successfully generated for {channel.name}'
-            with open(file_name, 'r') as f:
-                await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
-                await archive_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
+            await requests_channel.send(content=status, file=discord.File(file_name))
+            await archive_channel.send(content=status, file=discord.File(file_name))
             print(status)
             # delete event channel
             await channel.delete(reason='Archived (check #requests or #archives)')
