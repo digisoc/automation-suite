@@ -47,13 +47,13 @@ async def push_request(message):
     server = message.guild
     embed = message.embeds[0]
 
-    portfolio = embed.fields[2].value
     event_name = '-'.join(embed.fields[4].value.split())
 
     # setup permissions for roles (execs able to manage permissions)
-    roles = ['Execs', 'Marketing', 'Digital', 'axie']
-    if portfolio != 'N/A':
-        roles.append(portfolio)
+    portfolios = []
+    if embed.fields[2].name == 'Which Portfolio(s) are involved?':
+        portfolios = embed.fields[2].value.split('\n')
+    roles = ['Execs', 'Marketing', 'Digital', 'axie'] + portfolios
     roles = [get(server.roles, name=role) for role in roles]
 
     permissions = {role: discord.PermissionOverwrite(read_messages=True) for role in roles}
@@ -108,16 +108,19 @@ async def on_message(message):
                 os.makedirs('./archives')
             with open(file_name, 'w') as f:
                 f.write(content)
-            # post file to #requests
+            # post file to #requests and #archives
             requests_channel = get(message.guild.channels, name='requests')
+            archive_channel = get(message.guild.channels, name='archives')
             status = f'Archive successfully generated for {channel.name}'
             with open(file_name, 'r') as f:
                 await requests_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
+                await archive_channel.send(content=status, file=discord.File(f, filename=f'{channel.name}-archive.txt'))
             print(status)
             # delete event channel
-            await channel.delete(reason='Archived (check #requests)')
+            await channel.delete(reason='Archived (check #requests or #archives)')
             print('Channel deleted')
     except Exception as e:
+        print(e)
         await channel.send(e)
 
 
