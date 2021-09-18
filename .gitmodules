@@ -1,0 +1,3 @@
+[submodule "forms-to-discord/google-forms-to-discord"]
+	path = forms-to-discord/google-forms-to-discord
+	url = https://github.com/axieax/google-forms-to-discord.git
