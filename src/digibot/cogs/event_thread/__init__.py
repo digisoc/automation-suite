@@ -26,8 +26,11 @@ class EventThread(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx: commands.context.Context) -> None:
+        # check channel
+        if not self._is_from_requests_channel(ctx):
+            return
         # check webhook request
-        if not (self._is_from_requests_channel(ctx) and self._is_webhook_request):
+        if not self._is_webhook_request(ctx):
             return
         # create event thread
         await forward_request(ctx)
@@ -51,6 +54,7 @@ class EventThread(commands.Cog):
             return
         # create event thread
         await forward_request(ctx.message.reference.resolved)
+        print("after")
         await ctx.message.add_reaction("✅")
 
     @commands.command(description="archives and destroys an event thread")

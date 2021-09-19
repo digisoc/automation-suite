@@ -2,11 +2,15 @@
 import discord
 from discord.utils import get
 
+""" Helper Imports """
+from src.digibot.utils import debug
+
 """ Constants """
 FORM_EVENT_NAME_INDEX = 2
 FORM_PORTFOLIOS_INDEX = 4
 
 
+@debug
 async def forward_request(message: discord.Message) -> None:
     """
     Sets up an event thread for a new request
