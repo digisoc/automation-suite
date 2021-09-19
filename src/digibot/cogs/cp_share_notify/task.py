@@ -2,6 +2,7 @@
 import time
 import random
 import discord
+import asyncio
 import schedule
 from datetime import date
 from threading import Thread
@@ -34,20 +35,25 @@ class CPTask:
 
     def schedule_job(self) -> None:
         """Starts a Notifier Job on a separate thread"""
-        t = Thread(target=self._schedule_job)
-        # self._job = t
+        t = Thread(target=self.schedule_job)
         t.start()
 
     def _schedule_job(self) -> None:
-        """Job which runs the Notifier Job at the requested NOTIFY_TIME"""
-        schedule.every().day.at(NOTIFY_TIME).do(self.schedule_notify)
+        """Schedules a daily Notifier Job for the requested NOTIFY_TIME"""
+        schedule.every().day.at(NOTIFY_TIME).do(self.schedule_job_sync)
         while True:
             schedule.run_pending()
             time.sleep(REFRESH_RATE)
 
-    async def schedule_notify(
-        self, notify_date=date.today().strftime(DATE_FORMAT)
-    ) -> None:
+    def schedule_job_sync(self) -> None:
+        """Synchronous wrapper for schedule_notify"""
+        # REF: https://stackoverflow.com/a/59645689
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.schedule_notify_async())
+        loop.close()
+
+    async def schedule_notify_async(self, notify_date: str = "") -> None:
         """
         Sends CP Share Notifications according to the active schedule
 
@@ -60,6 +66,7 @@ class CPTask:
 
         # notify users scheduled to CP share for given day
         failures = []
+        notify_date = notify_date or date.today().strftime(DATE_FORMAT)
         users_to_notify = self._schedule[notify_date]
         for user in users_to_notify:
             # error check
@@ -69,7 +76,7 @@ class CPTask:
 
             # get message parameters
             name = user["name"]
-            user = self._server.get_member_named(name)
+            member = self._server.get_member_named(name)
             greeting = random.choice(GREETINGS)
             share_type = user["share_type"]
             event = user["event"]
@@ -77,10 +84,11 @@ class CPTask:
             # send direct message
             dm = f"{greeting} {name},\n\nJust a quick reminder that today is your scheduled day to share a **{share_type}** for DigiSoc's **{event}** event!\n\nHot tip: prime time for sharing seems to be around 7-9pm, and event CP's can be found on the Trello board :grin:"
             try:
-                await user.send(dm)
+                await member.send(dm)
                 print(f"Successfully sent reminder to {name}")
+                await asyncio.sleep(0.5)
             except Exception as e:
-                failures.append((name, e))
+                failures.append(f"{name} - {e}")
 
         # report failures to #requests
         if failures:

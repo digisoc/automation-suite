@@ -1,6 +1,7 @@
 """ Module Imports """
 import os
-import discord
+
+# import discord
 from discord.ext import commands
 
 """ Helper Imports """
@@ -31,6 +32,7 @@ class CPNotifier(commands.Cog):
     @commands.command()
     async def notifier_status(self, ctx: commands.context.Context) -> None:
         """Returns the current notifier status"""
+        await ctx.message.add_reaction("✅")
         await ctx.reply(
             self._task.get_schedule() if self.is_active() else NOTIFIER_INACTIVE
         )
@@ -38,11 +40,12 @@ class CPNotifier(commands.Cog):
     @commands.command()
     @commands.has_any_role("axie", "Marketing", "Execs")
     async def notifier_manual(
-        self, ctx: commands.context.Context, notify_date: str
+        self, ctx: commands.context.Context, notify_date: str = ""
     ) -> None:
         """(PLEASE AVOID!!) Manually invokes notifier for given day (default: current day)"""
         if self.is_active():
-            self._task.schedule_notify(notify_date)
+            await self._task.schedule_notify(notify_date)
+            await ctx.message.add_reaction("✅")
         else:
             await ctx.reply(NOTIFIER_INACTIVE)
 
@@ -87,6 +90,7 @@ class CPNotifier(commands.Cog):
         """Cancels the current running Notifier task"""
         if self.is_active():
             self._task.set_status(False)
+            await ctx.message.add_reaction("✅")
         else:
             await ctx.message.add_reaction("❌")
             await ctx.reply(NOTIFIER_INACTIVE)
