@@ -1,20 +1,23 @@
 """ Module Imports """
+import re
 import os
+import sys
 import discord
+import asyncio
+from discord.ext import commands
 from dotenv import load_dotenv
 
-""" Import DigiBot Features """
-from src.digibot.features.general import ping
-from src.digibot.features.event_thread.setup import forward_request
-from src.digibot.features.event_thread.destroy import archive_channel
-
 """ Constants """
-CAN_ARCHIVE_ROLES = {"Execs", "axie"}
+COGS_DIR = "src/digibot/cogs"
+ACTIVE_COGS = []
 
 
 """ Discord Bot Client """
-client = discord.Client()
-default_prefix = "!"
+command_prefix = "!"
+intents = discord.Intents.default()
+intents.members = True
+# PERMISSIONS?
+client = commands.Bot(command_prefix=command_prefix, intents=intents)
 
 
 @client.event
@@ -23,67 +26,80 @@ async def on_ready() -> None:
     Async function which is activated when DigiBot becomes online
     """
     print(f"{client.user} online")
+    load_cogs()
+    print(f"Active Cogs: {ACTIVE_COGS}")
 
 
-@client.event
-async def on_message(message: discord.Message) -> None:
-    """
-    Async function which is activated for all new messages sent and visible to DigiBot
-    """
-    # TODO: python3.10 match-case can be used here
-    try:
-        # retrieve message information
-        author = message.author
-        is_author_bot = message.author.bot
-        channel = message.channel
-        message_content = message.content
+# @client.event
+# async def on_message(message: discord.Message) -> None:
+#     """
+#     Async function which is activated for all new messages sent and visible to DigiBot
+#     """
+#     # TODO: python3.10 match-case can be used here
+#     try:
+#         # retrieve message information
+#         author = message.author
+#         is_author_bot = message.author.bot
+#         channel = message.channel
+#         message_content = message.content
 
-        # get roles for non-bot user
-        user_roles = (
-            {role.name for role in author.roles} if not is_author_bot else set()
-        )
-        can_user_archive = bool(CAN_ARCHIVE_ROLES.intersection(user_roles))
-
-        # general ping command
-        if message_content == default_prefix + "beep":
-            await ping(channel)
-            return
-
-        # automation commands
-        if channel.name == "requests":
-            is_digibot = author == client.user
-            if message.content == default_prefix + "redo" and (
-                message_reference := message.reference
-            ):
-                # redo push request for referenced message
-                await forward_request(message_reference.resolved)
-                await message.add_reaction("✅")
-                return
-            # push request to new channel
-            elif is_author_bot and not is_digibot:
-                # webhook request
-                await forward_request(message)
-                await message.add_reaction("✅")
-                return
-
-        # normal channel
-        elif message_content == default_prefix + "archive" and can_user_archive:
-            await archive_channel(message)
-            return
-
-    except Exception as e:
-        print(e)
-        await message.channel.send(e)
+#     except Exception as e:
+#         print(e)
+#         await message.channel.send(e)
 
 
-def start_discord_server() -> None:
+""" COGS (extensions which can be hot refreshed) """
+
+
+@client.command(
+    name="reload",
+    aliases=["restart", "refresh"],
+    description="reloads DigiBot features",
+)
+async def reload_cogs(ctx: commands.context.Context) -> None:
+    """Reloads Discord Cogs"""
+    unload_cogs()
+    load_cogs()
+    await ctx.message.add_reaction("✅")
+    print("Cogs successfully reloaded!")
+
+
+def load_cogs() -> None:
+    """Loads Discord Cogs"""
+    for file in os.scandir(COGS_DIR):
+        name = file.name
+        # ignore __init__.py
+        if name.startswith("__"):
+            continue
+        # strip .py extension
+        if file.is_file():
+            name = name.strip(".py")
+        # load cog
+        cog_name = f"{COGS_DIR}/{name}".replace("/", ".")
+        if name != "cp_share_notify":
+            client.load_extension(cog_name)
+            ACTIVE_COGS.append(cog_name)
+
+
+def unload_cogs() -> None:
+    """Unloads Discord Cogs"""
+    for cog_name in ACTIVE_COGS:
+        client.unload_extension(cog_name)
+    ACTIVE_COGS.clear()
+
+
+async def start_discord_server() -> None:
     """Starts up DigiBot"""
     # get TOKEN environment variable
     load_dotenv()
     token = os.getenv("TOKEN")
+    if not token:
+        print("ERROR: no Discord bot token found", file=sys.stderr)
+        return
     # start Discord client
-    client.run(token)
+    await client.start(token)
 
 
 if __name__ == "__main__":
-    start_discord_server()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_discord_server())
