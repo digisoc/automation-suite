@@ -57,7 +57,6 @@ class EventThread(commands.Cog):
             return
         # create event thread
         await forward_request(ctx.message.reference.resolved)
-        print("after")
         await ctx.message.add_reaction("✅")
 
     @commands.command()

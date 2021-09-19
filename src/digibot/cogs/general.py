@@ -20,11 +20,16 @@ class General(commands.Cog):
         )
 
     @commands.command()
-    async def beep(self, ctx: commands.context.Context):
+    async def beep(self, ctx: commands.context.Context) -> None:
         """Check if DigiBot is asleep"""
         # TODO: add round trip time
         await ctx.message.add_reaction("👋")
         await ctx.reply(content="boop!")
+
+    @commands.command()
+    async def echo(self, ctx: commands.context.Context, *args) -> None:
+        """Plagiarism without the academic integrity"""
+        await ctx.channel.send(" ".join(args))
 
 
 def setup(client: commands.bot.Bot) -> None:

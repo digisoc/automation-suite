@@ -1,114 +1,96 @@
 """ Module Imports """
 import os
-import schedule
 import discord
 from discord.ext import commands
-from discord.utils import get
-from threading import Thread
-from datetime import date
 
 """ Helper Imports """
+from src.digibot.cogs.cp_share_notify.task import CPTask
 from src.digibot.cogs.cp_share_notify.helpers import parse_schedule
-
 
 """ Constants """
 SCHEDULES_DIR = "src/digibot/cogs/cp_share_notify/schedules"
 if not os.path.exists(SCHEDULES_DIR):
     os.mkdir(SCHEDULES_DIR)
 
-GREETINGS = {"Howdy", "Ni Hao", "Hola", "Bonjour", "Ciao", "Konichiwa", "Ola"}
-NOTIFY_TIME = "18:30"
-
+NOTIFIER_INACTIVE = "No CP Share Schedule Notifier active :crying_cat_face:"
 
 # cp_commands = commands.Group("cp")
 
 
-class CPShare(commands.Cog):
+class CPNotifier(commands.Cog):
+    """CP Share Notifier"""
+
     def __init__(self, client: commands.bot.Bot) -> None:
         self._client: commands.bot.Bot = client
-        self._active_schedule = {}
-        self._active_notify = None  # thread
-        self._active_guild = None
+        self._task: CPTask = CPTask({})
+
+    def is_active(self) -> bool:
+        """Returns whether a CPNotifier has an active CPTask"""
+        return self._task.get_status()
 
     @commands.command()
-    async def schedule_status(self, ctx: commands.context.Context) -> None:
-        """Gets the current schedule status"""
+    async def notifier_status(self, ctx: commands.context.Context) -> None:
+        """Returns the current notifier status"""
         await ctx.reply(
-            self._active_schedule if self._active_notify else "No notifier running"
+            self._task.get_schedule() if self.is_active() else NOTIFIER_INACTIVE
         )
 
     @commands.command()
     @commands.has_any_role("axie", "Marketing", "Execs")
-    async def schedule_notify_manual(
-        self, ctx: commands.context.Context, day: str
+    async def notifier_manual(
+        self, ctx: commands.context.Context, notify_date: str
     ) -> None:
-        """Manually send notifications for current day (PLEASE AVOID)"""
-        # remove active thread
-        # schedule_notify()
-        await self._schedule_notify(day)
-
-    async def _schedule_notify(self, day=date.today()) -> None:
-        task = self._active_schedule
-        if not task:
-            return
-        # get current date
-        current_date = day.strftime("%Y-%m-%d")
-        current_year = current_date[:4]
-
-        # get DigiSoc Team server
-        server = get(self._client.guilds, name=f"DigiSoc Team {current_year}")
-        if not server:
-            raise Exception(
-                f"Could not find connected DigiSoc Team {current_year} server for CP Scheduling"
-            )
-
-        # notify users scheduled to CP share today
-        failures = []
-        users_to_notify = task[current_date]
-        for user in users_to_notify:
-            name = user["name"]
-            user = server.get_member_named(name)
-            greeting = random.choice(GREETINGS)
-            share_type = user["share_type"]
-            event = user["event"]
-
-            # send message
-            dm = f"{greeting} {name},\n\nJust a quick reminder that today is your scheduled day to share a **{share_type}** for DigiSoc's **{event}** event!\n\nHot tip: prime time for sharing seems to be around 7-9pm, and event CP's can be found on the Trello board :grin:"
-            try:
-                # await user.send(dm)
-                print(f"Successfully sent reminder to {name}")
-            except Exception as e:
-                failures.append((name, e))
-
-        # send failures to axie
-
-        # thread
+        """(PLEASE AVOID!!) Manually invokes notifier for given day (default: current day)"""
+        if self.is_active():
+            self._task.schedule_notify(notify_date)
+        else:
+            await ctx.reply(NOTIFIER_INACTIVE)
 
     @commands.command()
-    async def schedule_add(self, ctx: commands.context.Context) -> None:
-        """Starts a notifier for an attached .csv CP Schedule"""
-        # validate and save csv attachment
+    async def notifier_set(self, ctx: commands.context.Context) -> None:
+        """
+        Starts a notifier for an attached .csv CP Share Schedule
+        (attach or reply to a message with an attached schedule)
+        """
+        # determine type of attachment
         attachments = ctx.message.attachments
-        if not attachments:
-            return
-        attachment = attachments[0]
-        file_name = f"{SCHEDULES_DIR}/{attachment.filename}"
-        if not file_name.endswith(".csv"):
-            # TODO: may need file validation to confirm csv
-            return
-        await attachment.save(file_name)
+        message_reference = ctx.message.reference
+        if not attachments and message_reference:
+            # message reply
+            await self.notifier_set(message_reference)
+            await ctx.message.add_reaction("✅")
+        elif not attachments:
+            # invalid format
+            await ctx.message.add_reaction("❌")
+            await ctx.reply(
+                "Please attach or reply to a message with an attached schedule"
+            )
+        else:
+            # validate and save csv attachment
+            attachment = attachments[0]
+            file_name = f"{SCHEDULES_DIR}/{attachment.filename}"
+            if not file_name.endswith(".csv"):
+                # NOTE: may need file validation to confirm csv contents
+                return
+            await attachment.save(file_name)
 
-        # parse schedule
-        self._active_schedule = parse_schedule(file_name)
+            # parse schedule and create Notifier Task
+            schedule = parse_schedule(file_name)
+            self._task.set_schedule(schedule)
+            self._task.set_server(ctx.guild)
+            self._task.set_status(True)
 
-        # schedule notify
-        schedule.every().day.at(NOTIFY_TIME).do(self._schedule_notify)
+            await ctx.message.add_reaction("✅")
 
     @commands.command()
-    async def schedule_remove(self, ctx: commands.context.Context) -> None:
-        # TODO: remove thread
-        pass
+    async def notifier_disable(self, ctx: commands.context.Context) -> None:
+        """Cancels the current running Notifier task"""
+        if self.is_active():
+            self._task.set_status(False)
+        else:
+            await ctx.message.add_reaction("❌")
+            await ctx.reply(NOTIFIER_INACTIVE)
 
 
 def setup(client: commands.bot.Bot) -> None:
-    client.add_cog(CPShare(client))
+    client.add_cog(CPNotifier(client))
