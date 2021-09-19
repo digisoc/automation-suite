@@ -27,7 +27,7 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def website(self, ctx: commands.context.Context) -> None:
-        """DigiSoc website"""
+        """DigiSoc Website"""
         await ctx.reply("https://unswdigitalsociety.org/")
 
     @commands.command()

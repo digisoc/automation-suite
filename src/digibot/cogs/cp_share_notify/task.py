@@ -98,11 +98,11 @@ class CPTask:
                 f"**CP Notifier**\nThe following users were not successfully notified:\n{failure_report}"
             )
 
-    def get_schedule(self) -> dict[str, list[dict[str, str]]]:
+    def get_schedule(self) -> SCHEDULE_TYPE:
         """Getter for CP Notifier Task schedule"""
         return self._schedule
 
-    def set_schedule(self, schedule: dict[str, list[dict[str, str]]]) -> None:
+    def set_schedule(self, schedule: SCHEDULE_TYPE) -> None:
         """Setter for CP Notifier Task schedule"""
         self._schedule = schedule
 
