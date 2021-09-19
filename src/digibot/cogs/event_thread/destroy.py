@@ -4,19 +4,19 @@ import discord
 from discord.utils import get
 from discord.ext import commands
 
-""" Archives Directory """
+""" Constants """
 ARCHIVES_DIR = "src/digibot/cogs/event_thread/archives"
 if not os.path.exists(ARCHIVES_DIR):
     os.mkdir(ARCHIVES_DIR)
 
 
-def archive_channel_content(channel: discord.TextChannel) -> str:
+async def archive_channel_content(channel: discord.TextChannel) -> str:
     """
     Extracts and returns channel history as a string
     """
-    messages = channel.history().flatten()
+    messages = await channel.history().flatten()
     history_string = channel.name + "\n"
-    # traverse messages in reverse
+    # traverse messages in reverse order
     for message in messages[::-1]:
         # extract message info
         history_string += (
@@ -62,24 +62,31 @@ async def archive_channel(ctx: commands.context.Context) -> None:
     # get channel information
     channel = ctx.channel
     archive_channel = get(ctx.guild.channels, name="archives")
+
+    # no archive channel found
     if not archive_channel:
         await ctx.message.add_reaction("❌")
         await ctx.reply("No #archives text channel found!")
-        return
-    elif channel == archive_channel:
-        # TODO: DM messenger with archive of #archives
-        await ctx.message.add_reaction("❓")
-        await ctx.reply("Can't archive the archives channel!")
-        return
 
-    # extract channel content
-    channel_content = archive_channel_content(channel)
-    archive_file = generate_archive_file(channel.name, channel_content)
+    else:
+        # extract channel content
+        channel_content = await archive_channel_content(channel)
+        archive_file = generate_archive_file(channel.name, channel_content)
 
-    # post archive file to archives channel
-    status = f"Archive successfully generated for {channel.name}"
-    await archive_channel.send(content=status, file=archive_file)
-    print(status)
+        if channel == archive_channel:
+            # requested archive on archives channel
+            await ctx.message.add_reaction("❓")
+            await ctx.author.send(
+                "Beep boop, here are your archives! :robot:", file=archive_file
+            )
+            await ctx.reply(
+                "Can't archive the archives channel, but a copy of this channel has been sent to your DM's!"
+            )
+        else:
+            # post archive file to archives channel
+            status = f"Archive successfully generated for {channel.name}"
+            await archive_channel.send(content=status, file=archive_file)
+            print(status)
 
-    # delete event channel
-    await channel.delete(reason="Archived (please check #archives)")
+            # delete event channel
+            await channel.delete(reason="Archived (please check #archives)")

@@ -13,7 +13,6 @@ class General(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.member.Member) -> None:
         """Method which is invokes when a member joins a guild"""
-        # NOTE: requires SERVER MEMBERS INTENT
         channel = member.guild.system_channel
         await channel.send(
             f"Welcome {member.mention} to the DigiSoc Teams Discord! Please change your nickname to your actual name :smiley_cat:"
@@ -29,6 +28,7 @@ class General(commands.Cog):
     @commands.command()
     async def echo(self, ctx: commands.context.Context, *args) -> None:
         """Plagiarism without the academic integrity"""
+        await ctx.message.add_reaction("✅")
         await ctx.channel.send(" ".join(args))
 
 

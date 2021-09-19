@@ -19,7 +19,9 @@ class EventThread(commands.Cog):
 
     def _is_from_requests_channel(self, ctx: commands.context.Context) -> bool:
         """Checks if an incoming message originates from the requests channel"""
-        return ctx.channel.name == REQUESTS_CHANNEL
+        if isinstance(ctx.channel, discord.channel.TextChannel):
+            return ctx.channel.name == REQUESTS_CHANNEL
+        return False  # e.g. discord.channel.DMChannel
 
     def _is_webhook_request(self, ctx: commands.context.Context) -> bool:
         """Checks if an incoming message is a Forms to Discord webhook request"""
@@ -27,13 +29,18 @@ class EventThread(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx: commands.context.Context) -> None:
-        """Listener"""
+        """
+        Listener for incoming Forms to Discord requests
+        https://github.com/axieax/google-forms-to-discord/
+        """
         # check channel
         if not self._is_from_requests_channel(ctx):
             return
+
         # check webhook request
         if not self._is_webhook_request(ctx):
             return
+
         # create event thread
         await forward_request(ctx)
         await ctx.message.add_reaction("✅")
@@ -48,6 +55,7 @@ class EventThread(commands.Cog):
                 "Redo command must be invoked from the #requests text channel"
             )
             return
+
         # check reference
         if not ctx.message.reference:
             await ctx.message.add_reaction("❌")
@@ -55,6 +63,7 @@ class EventThread(commands.Cog):
                 "Redo command must contain a message reference (reply to a request)"
             )
             return
+
         # create event thread
         await forward_request(ctx.message.reference.resolved)
         await ctx.message.add_reaction("✅")
@@ -63,7 +72,7 @@ class EventThread(commands.Cog):
     @commands.has_any_role("Execs", "axie")
     async def archive(self, ctx: commands.context.Context) -> None:
         """Archives and removes a Discord text channel"""
-        # check permissions
+        # TODO: notify missing permissions?
         await archive_channel(ctx)
 
 
