@@ -7,6 +7,10 @@ from collections import defaultdict
 DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
+def notify_user(ctx, name, event, share_type) -> None:
+    pass
+
+
 def parse_schedule(file_name: str) -> dict[str, list[dict[str, str]]]:
     """
     Parses a given CP schedule and returns a dictionary which maps dates (key)

@@ -1,5 +1,5 @@
 """ Module Imports """
-import traceback
+# import traceback
 
 
 def debug(func):
@@ -8,11 +8,11 @@ def debug(func):
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
-        except Exception:
-            exception = traceback.format_exc()
+        except Exception as e:
+            # exception = traceback.format_exc() # would not advise exposing
             ctx = args[0]
             if ctx:
-                await ctx.reply(exception)
+                await ctx.reply(e)
             raise
 
     return wrapper

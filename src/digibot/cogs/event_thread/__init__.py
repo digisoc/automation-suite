@@ -13,19 +13,21 @@ REQUESTS_CHANNEL = "requests"
 class EventThread(commands.Cog):
     """DigiBot Event Thread Features"""
 
-    def __init__(self, client):
+    def __init__(self, client: commands.bot.Bot) -> None:
         """Constructor for Event Thread Cog"""
-        self._client = client
+        self._client: commands.bot.Bot = client
 
     def _is_from_requests_channel(self, ctx: commands.context.Context) -> bool:
         """Checks if an incoming message originates from the requests channel"""
         return ctx.channel.name == REQUESTS_CHANNEL
 
     def _is_webhook_request(self, ctx: commands.context.Context) -> bool:
+        """Checks if an incoming message is a Forms to Discord webhook request"""
         return ctx.author.bot and not (ctx.author == self._client.user)
 
     @commands.Cog.listener()
     async def on_message(self, ctx: commands.context.Context) -> None:
+        """Listener"""
         # check channel
         if not self._is_from_requests_channel(ctx):
             return
@@ -38,6 +40,7 @@ class EventThread(commands.Cog):
 
     @commands.command()
     async def redo(self, ctx: commands.context.Context) -> None:
+        """Manually creates an event thread from a referenced response"""
         # check channel
         if not self._is_from_requests_channel(ctx):
             await ctx.message.add_reaction("❌")
@@ -57,13 +60,13 @@ class EventThread(commands.Cog):
         print("after")
         await ctx.message.add_reaction("✅")
 
-    @commands.command(description="archives and destroys an event thread")
+    @commands.command()
     @commands.has_any_role("Execs", "axie")
     async def archive(self, ctx: commands.context.Context) -> None:
-        """Archives a Discord text channel"""
+        """Archives and removes a Discord text channel"""
         # check permissions
         await archive_channel(ctx)
 
 
-def setup(client):
+def setup(client: commands.bot.Bot) -> None:
     client.add_cog(EventThread(client))

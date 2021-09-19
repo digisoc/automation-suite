@@ -20,6 +20,9 @@ intents.members = True
 client = commands.Bot(command_prefix=command_prefix, intents=intents)
 
 
+# TODO: convert to Discord slash commands
+
+
 @client.event
 async def on_ready() -> None:
     """
@@ -48,7 +51,7 @@ async def on_ready() -> None:
 #         await message.channel.send(e)
 
 
-""" COGS (extensions which can be hot refreshed) """
+""" COGS (extensions) """
 
 
 @client.command(
@@ -57,7 +60,7 @@ async def on_ready() -> None:
     description="reloads DigiBot features",
 )
 async def reload_cogs(ctx: commands.context.Context) -> None:
-    """Reloads Discord Cogs"""
+    """Hot refreshes DigiBot"""
     unload_cogs()
     load_cogs()
     await ctx.message.add_reaction("✅")
@@ -76,9 +79,8 @@ def load_cogs() -> None:
             name = name.strip(".py")
         # load cog
         cog_name = f"{COGS_DIR}/{name}".replace("/", ".")
-        if name != "cp_share_notify":
-            client.load_extension(cog_name)
-            ACTIVE_COGS.append(cog_name)
+        client.load_extension(cog_name)
+        ACTIVE_COGS.append(cog_name)
 
 
 def unload_cogs() -> None:
