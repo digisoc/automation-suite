@@ -61,9 +61,9 @@ class CPNotifier(commands.Cog):
         is_success = False
         message_reference = ctx.message.reference
         if message_reference:
-            is_success = self._notifier_set(message_reference.resolved, ctx.guild)
+            is_success = await self._notifier_set(message_reference.resolved, ctx.guild)
         else:
-            is_success = self._notifier_set(ctx.message, ctx.guild)
+            is_success = await self._notifier_set(ctx.message, ctx.guild)
 
         await ctx.message.add_reaction("✅" if is_success else "❌")
 
