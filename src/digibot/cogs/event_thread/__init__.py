@@ -43,7 +43,7 @@ class EventThread(commands.Cog):
 
         # create event thread
         await forward_request(ctx)
-        await ctx.message.add_reaction("✅")
+        await ctx.add_reaction("✅")
 
     @commands.command()
     async def redo(self, ctx: commands.Context) -> None:
