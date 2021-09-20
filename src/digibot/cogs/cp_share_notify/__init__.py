@@ -1,12 +1,11 @@
 """ Module Imports """
 import os
-import json
 import discord
 from discord.ext import commands
 
 """ Helper Imports """
 from src.digibot.cogs.cp_share_notify.task import CPTask
-from src.digibot.cogs.cp_share_notify.helpers import parse_schedule
+from src.digibot.cogs.cp_share_notify.helpers import SCHEDULE_TYPE, parse_schedule
 
 """ Constants """
 SCHEDULES_DIR = "src/digibot/cogs/cp_share_notify/schedules"
@@ -34,13 +33,39 @@ class CPNotifier(commands.Cog):
         """Returns the current notifier status"""
         if self.is_active():
             await ctx.message.add_reaction("✅")
-            await ctx.reply(json.dumps(self._task.get_schedule(), indent=2))
+            embed = await self._create_embed(self._task.get_schedule())
+            await ctx.send(embed=embed)
         else:
             await ctx.message.add_reaction("❓")
             await ctx.reply(NOTIFIER_INACTIVE)
 
+    async def _create_embed(self, schedule: SCHEDULE_TYPE) -> discord.Embed:
+        """Creates am embed for a given schedule"""
+        # NOTE: sort by day? add current csv file name to description?
+        # create discord.Embed object
+        embed = discord.Embed(
+            title="CP Share Notifier",
+            description="Status: Enabled :green_circle:",
+            color=10511870,
+        )
+
+        # set image as DigiBot logo
+        avatar = self._client.user.avatar_url
+        embed.set_thumbnail(url=str(avatar))
+
+        # add fields
+        for day, users in schedule.items():
+            users_info = (
+                f"**{user['name']}:** {user['event']} ({user['share_type']})"
+                for user in users
+            )
+            embed.add_field(name=day, value="\n".join(users_info))
+
+        embed.set_footer(text="DigiBot CP Share Automation - https://github.com/axieax")
+        return embed
+
     @commands.command()
-    @commands.has_any_role("axie", "Marketing", "Execs")
+    @commands.has_any_role("axie", "Execs")
     async def notifier_manual(
         self, ctx: commands.Context, notify_date: str = ""
     ) -> None:
