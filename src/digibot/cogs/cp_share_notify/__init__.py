@@ -58,44 +58,47 @@ class CPNotifier(commands.Cog):
         (attach or reply to a message with an attached schedule)
         """
         # determine type of request
-        attachments = ctx.message.attachments
+        is_success = False
         message_reference = ctx.message.reference
-
-        if not attachments and not message_reference:
-            # invalid format
-            await ctx.message.add_reaction("❌")
-            await ctx.reply(
-                "Please attach or reply to a message with an attached schedule"
-            )
-
-        elif not attachments:
-            # message reply -> extract attachment from original reference
-            await self._notifier_set(message_reference, ctx.guild)
-            await ctx.message.add_reaction("✅")
-
+        if message_reference:
+            is_success = self._notifier_set(message_reference.resolved, ctx.guild)
         else:
-            # extract attachment from message
-            await self._notifier_set(ctx.message, ctx.guild)
+            is_success = self._notifier_set(ctx.message, ctx.guild)
+
+        await ctx.message.add_reaction("✅" if is_success else "❌")
 
     async def _notifier_set(
         self, message: discord.Message, server: discord.Guild
-    ) -> None:
-        """Extract and parse .csv CPShare Schedule file in message"""
+    ) -> bool:
+        """
+        Extract and parse .csv CPShare Schedule file in given message
+
+        Return:
+            success_status (bool)
+        """
+        if not message.attachments:
+            # message does not contain any attachments
+            return False
+
         # validate and save csv attachment
         attachment = message.attachments[0]
         file_name = f"{SCHEDULES_DIR}/{attachment.filename}"
         if not file_name.endswith(".csv"):
             # NOTE: may need file validation to confirm csv contents
-            return
+            return False
         await attachment.save(file_name)
 
         # parse schedule and create Notifier Task
-        schedule = parse_schedule(file_name)
-        self._task.set_schedule(schedule)
-        self._task.set_server(server)
-        self._task.set_status(True)
+        try:
+            schedule = parse_schedule(file_name)
+            self._task.set_schedule(schedule)
+            self._task.set_server(server)
+            self._task.set_status(True)
+        except Exception as e:
+            print(e)
+            return False
 
-        await message.add_reaction("✅")
+        return True
 
     @commands.command()
     async def notifier_disable(self, ctx: commands.Context) -> None:
