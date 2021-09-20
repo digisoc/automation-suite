@@ -52,10 +52,10 @@ async def forward_request(message: discord.Message) -> None:
 
     # forward google forms to discord notification embed and created forms
     form_details = message.content
-    status = (
-        f"A new channel has been automatically set up for {event_name}!\n{form_details}"
+    status = f"A new channel has been automatically set up for {event_name}!\n"
+    forwarded_message = await new_channel.send(
+        content=status + form_details, embed=embed
     )
-    forwarded_message = await new_channel.send(content=status, embed=embed)
     await forwarded_message.pin()
 
     print(status)
