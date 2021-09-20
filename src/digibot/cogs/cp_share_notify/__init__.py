@@ -71,7 +71,7 @@ class CPNotifier(commands.Cog):
     ) -> None:
         """(PLEASE AVOID!!) Manually invokes notifier for given day (default: current day)"""
         if self.is_active():
-            await self._task.schedule_notify(notify_date)
+            await self._task.schedule_notify_async(notify_date)
             await ctx.message.add_reaction("✅")
         else:
             await ctx.reply(NOTIFIER_INACTIVE)
