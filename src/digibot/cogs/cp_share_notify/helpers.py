@@ -96,4 +96,8 @@ def parse_schedule(file_name: str):
             if not is_empty_event:
                 prev_event = event_info
 
+    # sort users for each day by name
+    for users in schedule.values():
+        users.sort(key=lambda user: user["name"])
+
     return schedule
