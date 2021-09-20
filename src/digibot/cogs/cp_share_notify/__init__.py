@@ -5,7 +5,7 @@ from discord.ext import commands
 
 """ Helper Imports """
 from src.digibot.cogs.cp_share_notify.task import CPTask
-from src.digibot.cogs.cp_share_notify.helpers import SCHEDULE_TYPE, parse_schedule
+from src.digibot.cogs.cp_share_notify.helpers import parse_schedule
 
 """ Constants """
 SCHEDULES_DIR = "src/digibot/cogs/cp_share_notify/schedules"
@@ -39,7 +39,7 @@ class CPNotifier(commands.Cog):
             await ctx.message.add_reaction("❓")
             await ctx.reply(NOTIFIER_INACTIVE)
 
-    async def _create_embed(self, schedule: SCHEDULE_TYPE) -> discord.Embed:
+    async def _create_embed(self, schedule) -> discord.Embed:
         """Creates am embed for a given schedule"""
         # NOTE: sort by day? add current csv file name to description?
         # create discord.Embed object
