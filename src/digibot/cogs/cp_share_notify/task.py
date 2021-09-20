@@ -99,11 +99,11 @@ class CPTask:
                 f"**CPShare Notifier**\nThe following users were not successfully notified:\n{failure_report}"
             )
 
-    def get_schedule(self) -> SCHEDULE_TYPE:
+    def get_schedule(self):
         """Getter for CPShare Notifier Task schedule"""
         return self._schedule
 
-    def set_schedule(self, schedule: SCHEDULE_TYPE) -> None:
+    def set_schedule(self, schedule) -> None:
         """Setter for CPShare Notifier Task schedule"""
         self._schedule = schedule
 
