@@ -1,4 +1,4 @@
-# DigiSoc Automation for Internal Workflow
+# DigiSoc Automation Suite for Internal Workflow
 
 Andrew Xie, 2021
 
