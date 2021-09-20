@@ -6,10 +6,9 @@ from collections import defaultdict
 """ Constants """
 DATE_FORMAT = "%Y-%m-%d"
 DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
-SCHEDULE_TYPE = dict[str, list[dict[str, str]]]
 
 
-def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
+def parse_schedule(file_name: str):
     """
     Parses a given CPShare schedule and returns a dictionary which maps dates (key)
     to a list of dictionaries (value) containing CP sharer information

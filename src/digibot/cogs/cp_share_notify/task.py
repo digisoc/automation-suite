@@ -9,7 +9,7 @@ from threading import Thread
 from discord.utils import get
 
 """ Import Helpers """
-from src.digibot.cogs.cp_share_notify.helpers import DATE_FORMAT, SCHEDULE_TYPE
+from src.digibot.cogs.cp_share_notify.helpers import DATE_FORMAT
 
 """ Constants """
 NOTIFY_TIME = "18:30"
@@ -24,12 +24,12 @@ class CPTask:
 
     def __init__(
         self,
-        schedule: SCHEDULE_TYPE,
+        schedule,
         server: discord.Guild = None,
         active: bool = False,
     ):
         """Constructor for CPShare Notifier Task class"""
-        self._schedule: SCHEDULE_TYPE = schedule
+        self._schedule = schedule
         self._server: discord.Guild = server
         self._active: bool = active
         self.schedule_job()
