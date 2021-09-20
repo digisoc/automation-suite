@@ -55,7 +55,7 @@ def generate_archive_file(channel_name: str, channel_content: str) -> discord.Fi
     return discord.File(file_name)
 
 
-async def archive_channel(ctx: commands.context.Context) -> None:
+async def archive_channel(ctx: commands.Context) -> None:
     """
     Archives a text channel
     """

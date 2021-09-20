@@ -38,7 +38,7 @@ async def on_ready() -> None:
     name="reload",
     aliases=["restart", "refresh"],
 )
-async def reload_cogs(ctx: commands.context.Context) -> None:
+async def reload_cogs(ctx: commands.Context) -> None:
     """Hot refreshes DigiBot"""
     unload_cogs()
     load_cogs()
@@ -83,6 +83,7 @@ async def start_discord_server() -> None:
 
 
 if __name__ == "__main__":
+    # runs async function on event loop
     import asyncio
 
     loop = asyncio.get_event_loop()

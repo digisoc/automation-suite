@@ -13,22 +13,22 @@ REQUESTS_CHANNEL = "requests"
 class EventThread(commands.Cog):
     """DigiBot Event Thread Features"""
 
-    def __init__(self, client: commands.bot.Bot) -> None:
+    def __init__(self, client: commands.Bot) -> None:
         """Constructor for Event Thread Cog"""
-        self._client: commands.bot.Bot = client
+        self._client: commands.Bot = client
 
-    def _is_from_requests_channel(self, ctx: commands.context.Context) -> bool:
+    def _is_from_requests_channel(self, ctx: commands.Context) -> bool:
         """Checks if an incoming message originates from the requests channel"""
         if isinstance(ctx.channel, discord.channel.TextChannel):
             return ctx.channel.name == REQUESTS_CHANNEL
         return False  # e.g. discord.channel.DMChannel
 
-    def _is_webhook_request(self, ctx: commands.context.Context) -> bool:
+    def _is_webhook_request(self, ctx: commands.Context) -> bool:
         """Checks if an incoming message is a Forms to Discord webhook request"""
         return ctx.author.bot and not (ctx.author == self._client.user)
 
     @commands.Cog.listener()
-    async def on_message(self, ctx: commands.context.Context) -> None:
+    async def on_message(self, ctx: commands.Context) -> None:
         """
         Listener for incoming Forms to Discord requests
         https://github.com/axieax/google-forms-to-discord/
@@ -46,7 +46,7 @@ class EventThread(commands.Cog):
         await ctx.message.add_reaction("✅")
 
     @commands.command()
-    async def redo(self, ctx: commands.context.Context) -> None:
+    async def redo(self, ctx: commands.Context) -> None:
         """Manually creates an event thread from a referenced response"""
         # check channel
         if not self._is_from_requests_channel(ctx):
@@ -70,11 +70,11 @@ class EventThread(commands.Cog):
 
     @commands.command()
     @commands.has_any_role("Execs", "axie")
-    async def archive(self, ctx: commands.context.Context) -> None:
+    async def archive(self, ctx: commands.Context) -> None:
         """Archives and removes a Discord text channel"""
         # TODO: notify missing permissions?
         await archive_channel(ctx)
 
 
-def setup(client: commands.bot.Bot) -> None:
+def setup(client: commands.Bot) -> None:
     client.add_cog(EventThread(client))

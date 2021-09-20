@@ -19,15 +19,16 @@ REFRESH_RATE = 5 * MINUTE_TO_SEC
 GREETINGS = ("Howdy", "Ni Hao", "Hola", "Bonjour", "Ciao", "Konichiwa", "Ola")
 
 
-# NOTE: Notifier
 class CPTask:
+    """CPShare Notifier Task"""
+
     def __init__(
         self,
         schedule: SCHEDULE_TYPE,
         server: discord.Guild = None,
         active: bool = False,
     ):
-        """Constructor for CP Notifier Task class"""
+        """Constructor for CPShare Notifier Task class"""
         self._schedule: SCHEDULE_TYPE = schedule
         self._server: discord.Guild = server
         self._active: bool = active
@@ -55,7 +56,7 @@ class CPTask:
 
     async def schedule_notify_async(self, notify_date: str = "") -> None:
         """
-        Sends CP Share Notifications according to the active schedule
+        Sends CPShare Notifications according to the active schedule
 
         Args:
             notify_date (str): users assigned to this date will be notified (OPTIONAL)
@@ -95,29 +96,29 @@ class CPTask:
             request_channel = get(self._server.channels, name="requests")
             failure_report = "\n\t".join(failures)
             await request_channel.send(
-                f"**CP Notifier**\nThe following users were not successfully notified:\n{failure_report}"
+                f"**CPShare Notifier**\nThe following users were not successfully notified:\n{failure_report}"
             )
 
     def get_schedule(self) -> SCHEDULE_TYPE:
-        """Getter for CP Notifier Task schedule"""
+        """Getter for CPShare Notifier Task schedule"""
         return self._schedule
 
     def set_schedule(self, schedule: SCHEDULE_TYPE) -> None:
-        """Setter for CP Notifier Task schedule"""
+        """Setter for CPShare Notifier Task schedule"""
         self._schedule = schedule
 
     def get_server(self) -> discord.Guild:
-        """Getter for CP Notifier Task server"""
+        """Getter for CPShare Notifier Task server"""
         return self._server
 
     def set_server(self, server: discord.Guild) -> None:
-        """Getter for CP Notifier Task server"""
+        """Getter for CPShare Notifier Task server"""
         self._server = server
 
     def get_status(self) -> bool:
-        """Getter for CP Notifier Task active status"""
+        """Getter for CPShare Notifier Task active status"""
         return self._active
 
     def set_status(self, status: bool) -> None:
-        """Setter for CP Notifier Task active status"""
+        """Setter for CPShare Notifier Task active status"""
         self._active = status

@@ -11,7 +11,7 @@ SCHEDULE_TYPE = dict[str, list[dict[str, str]]]
 
 def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
     """
-    Parses a given CP schedule and returns a dictionary which maps dates (key)
+    Parses a given CPShare schedule and returns a dictionary which maps dates (key)
     to a list of dictionaries (value) containing CP sharer information
 
     Args:
