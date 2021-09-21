@@ -14,7 +14,7 @@ ACTIVE_COGS = []
 command_prefix = "!"
 intents = discord.Intents.default()
 intents.members = True
-activity = discord.Activity(type=discord.ActivityType.playing, name="beep boop")
+activity = discord.Activity(type=discord.ActivityType.playing, name="beep boop!")
 client = commands.Bot(command_prefix=command_prefix, intents=intents, activity=activity)
 
 
