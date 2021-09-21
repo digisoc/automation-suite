@@ -36,7 +36,7 @@ class CPTask:
 
     def schedule_job(self) -> None:
         """Starts a Notifier Job on a separate thread"""
-        t = Thread(target=self.schedule_job)
+        t = Thread(target=self._schedule_job)
         t.start()
 
     def _schedule_job(self) -> None:
