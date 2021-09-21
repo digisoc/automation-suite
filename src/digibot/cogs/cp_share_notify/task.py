@@ -36,12 +36,12 @@ class CPTask:
 
     def schedule_job(self) -> None:
         """Starts a Notifier Job on a separate thread"""
+        schedule.every().day.at(NOTIFY_TIME).do(self.schedule_job_sync)
         t = Thread(target=self.schedule_job)
         t.start()
 
     def _schedule_job(self) -> None:
         """Schedules a daily Notifier Job for the requested NOTIFY_TIME"""
-        schedule.every().day.at(NOTIFY_TIME).do(self.schedule_job_sync)
         while True:
             schedule.run_pending()
             time.sleep(REFRESH_RATE)
