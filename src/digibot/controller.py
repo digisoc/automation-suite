@@ -14,7 +14,8 @@ ACTIVE_COGS = []
 command_prefix = "!"
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix=command_prefix, intents=intents)
+activity = discord.Activity(type=discord.ActivityType.playing, name="beep boop")
+client = commands.Bot(command_prefix=command_prefix, intents=intents, activity=activity)
 
 
 # TODO: convert to Discord slash commands
