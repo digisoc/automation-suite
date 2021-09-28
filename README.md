@@ -36,6 +36,8 @@ This can be found in https://discord.com/applications/{application_id}/bot
 
 `TOKEN=DISCORD_BOT_TOKEN`
 
+Intent?
+
 ### Docker Deployment
 
 Build image

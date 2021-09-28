@@ -34,7 +34,7 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
     # remove rows from end
     rows_to_drop = 0
     encountered_empty = False
-    for row_index, row in enumerate(df.values[::-1]):
+    for row in df.values[::-1]:
         empty_row = all(pd.isnull(cell) for cell in row)
         if empty_row:
             encountered_empty = True
