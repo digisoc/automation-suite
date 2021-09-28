@@ -1,8 +1,21 @@
-# DigiSoc Automation Suite for Internal Workflow
+# DigiSoc Automation Suite
 
-Andrew Xie, 2021
+Automation tools designed by Andrew Xie (2021) to improve DigiSoc internal workflow.
 
-Description
+Two main tools:
+
+- [Google Forms to Discord](https://github.com/axieax/google-forms-to-discord)
+- [DigiBot (Discord Bot)](src/digibot)
+
+## Workflow Diagrams
+
+### Event Thread Automation Workflow
+
+![Event Thread Workflow](assets/event_thread_workflow.png)
+
+### Marketing Schedule Notifier Automation Workflow
+
+![Marketing Schedule Workflow](assets/marketing_schedule_workflow.png)
 
 ## Setup
 
@@ -22,7 +35,3 @@ Build image
 Create container from image
 `docker run digibot-image`
 add `-d` flag for daemonised/detached process (in background)
-
-### Google Forms to Discord
-
-### Discord event thread automation (DigiBot)
