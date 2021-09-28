@@ -6,19 +6,18 @@ Two main tools have been written to achieve this:
 
 - [Google Forms to Discord](https://github.com/axieax/google-forms-to-discord)
 
-  - We use a modified version of this script to add additional functionality for automating generation of registration and attendance forms (with Google Sheets for analytics)
-  - This script can be found [here](forms-to-discord/digisoc.js)
+  - We use a [modified version](forms-to-discord/digisoc.js) of this script to add additional functionality for automating generation of registration and attendance forms (with Google Sheets for analytics)
   - **NOTE:** Please make sure to never commit secrets such as the Drive ID for the Google Drives folder, as well as the Discord Webhook URL
 
 - [DigiBot (Discord Bot)](src/digibot)
 
 ## Workflow Diagrams
 
-> Event Thread Automation Workflow
+### Event Thread Automation Workflow
 
 ![Event Thread Workflow](assets/event_thread_workflow.png)
 
-> Marketing Schedule Notifier Automation Workflow
+### Marketing Schedule Notifier Automation Workflow
 
 ![Marketing Schedule Workflow](assets/marketing_schedule_workflow.png)
 
