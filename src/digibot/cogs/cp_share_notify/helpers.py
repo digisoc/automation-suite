@@ -8,6 +8,9 @@ DATE_FORMAT = "%Y-%m-%d"
 DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
 SCHEDULE_TYPE = dict[str, list[dict[str, str]]]
 
+ROW_AXIS = 0
+COLUMN_AXIS = 1
+
 
 def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
     """
@@ -28,8 +31,21 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
     # import schedule
     df = pd.read_csv(file_name)
 
-    # drop first, second-last and last columns
-    df = df.drop(df.columns[[0, -2, -1]], axis=1)
+    # remove rows from end
+    rows_to_drop = 0
+    encountered_empty = False
+    for row_index, row in enumerate(df.values[::-1]):
+        empty_row = all(pd.isnull(cell) for cell in row)
+        if empty_row:
+            encountered_empty = True
+        elif encountered_empty:
+            break
+        rows_to_drop += 1
+
+    df = df.head(-rows_to_drop)
+
+    # remove extra columns
+    df = df.dropna(how="all", axis=COLUMN_AXIS)
 
     # label columns
     df.columns = [
@@ -42,7 +58,7 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
         "Saturday",
         "Sunday",
     ]
-    df.head()
+    # df.head()
 
     # remove PRIME TIME rows
     condition = df["Event Info"] != "PRIME TIME"

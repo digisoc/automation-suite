@@ -3,7 +3,7 @@ import time
 import random
 import discord
 import asyncio
-import schedule
+import schedule  # can also check out APScheduler
 from datetime import date
 from threading import Thread
 from discord.utils import get
