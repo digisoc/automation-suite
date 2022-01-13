@@ -29,6 +29,7 @@ client = commands.Bot(command_prefix=command_prefix, intents=intents, activity=a
 
 # TODO: convert to Discord slash commands
 # TODO: attach logger (who activated what command)
+# REFACTOR: remove code from __init__.py files
 
 
 @client.event
@@ -96,5 +97,6 @@ if __name__ == "__main__":
     # runs async function on event loop
     import asyncio
 
+    # NOTE: python versions > 3.10: asyncio.get_event_loop replaced with asyncio.get_running_loop
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_discord_server())

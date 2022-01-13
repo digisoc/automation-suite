@@ -1,12 +1,16 @@
 """ Module Imports """
 import re
-import pandas as pd
 from collections import defaultdict
+from typing import Dict, List
+
+import pandas as pd
 
 """ Constants """
 DATE_FORMAT = "%Y-%m-%d"
 DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
-SCHEDULE_TYPE = dict[str, list[dict[str, str]]]
+# NOTE: to support python versions < 3.9
+# SCHEDULE_TYPE = dict[str, list[dict[str, str]]]
+SCHEDULE_TYPE = Dict[str, List[Dict[str, str]]]
 
 ROW_AXIS = 0
 COLUMN_AXIS = 1
