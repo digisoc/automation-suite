@@ -1,6 +1,7 @@
 """ Module Imports """
 import os
 import sys
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -10,11 +11,19 @@ COGS_DIR = "src/digibot/cogs"
 ACTIVE_COGS = []
 
 
-""" Discord Bot Client """
+"""
+Discord Bot Client
+Permissions:
+- Coded Intents: members (https://discordpy.readthedocs.io/en/latest/api.html#discord.Intents.members)
+- Privileged Intents: Server Members Intent, Message Content Intent (enable through GUI)
+- Bot Permissions (DigiBot Role): Administrator
+"""
 command_prefix = "!"
+activity = discord.Activity(type=discord.ActivityType.playing, name="beep boop!")
+
 intents = discord.Intents.default()
 intents.members = True
-activity = discord.Activity(type=discord.ActivityType.playing, name="beep boop!")
+
 client = commands.Bot(command_prefix=command_prefix, intents=intents, activity=activity)
 
 

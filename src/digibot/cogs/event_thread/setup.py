@@ -22,7 +22,7 @@ async def forward_request(message: discord.Message) -> None:
     channel_name = "-".join(event_name.split())
 
     # extract relevant portfolios
-    roles = ["Execs", "Marketing", "Digital", "axie"]
+    roles = ["Execs", "Marketing", "axie"]
     portfolios_field = embed.fields[FORM_PORTFOLIOS_INDEX]
     if portfolios_field.name == "Which Portfolio(s) are involved?":
         roles += portfolios_field.value.split("\n")
