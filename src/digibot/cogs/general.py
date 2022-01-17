@@ -15,7 +15,7 @@ class General(commands.Cog):
         """Method which is invokes when a member joins a guild"""
         channel = member.guild.system_channel
         await channel.send(
-            f"Welcome {member.mention} to the DigiSoc Teams Discord! Please change your nickname to your actual name :smiley_cat:"
+            f"Welcome {member.mention} to the DigiSoc Team Discord! Please change your nickname to your actual name :smiley_cat:"
         )
 
     @commands.command()
