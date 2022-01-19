@@ -29,7 +29,8 @@ client = commands.Bot(command_prefix=command_prefix, intents=intents, activity=a
 
 # TODO: convert to Discord slash commands
 # TODO: attach logger (who activated what command)
-# REFACTOR: remove code from __init__.py files
+# TODO: more consistent command reactions
+# TODO: setup black formatter pipeline
 
 
 @client.event

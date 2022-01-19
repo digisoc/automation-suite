@@ -1,9 +1,8 @@
 import asyncio
 from threading import Thread
 
-from src.server import start_flask_server
 from src.digibot.controller import start_discord_server
-
+from src.server import start_flask_server
 
 if __name__ == "__main__":
     # start Flask server

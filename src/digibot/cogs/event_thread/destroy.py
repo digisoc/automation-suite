@@ -1,8 +1,9 @@
 """ Module Imports """
 import os
+
 import discord
-from discord.utils import get
 from discord.ext import commands
+from discord.utils import get
 
 """ Constants """
 ARCHIVES_DIR = "src/digibot/cogs/event_thread/archives"
