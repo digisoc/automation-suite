@@ -23,7 +23,7 @@ class General(commands.Cog):
         """Check if DigiBot is asleep"""
         # TODO: add round trip time
         await ctx.message.add_reaction("👋")
-        await ctx.reply(content="boop!")
+        await ctx.reply(content="shutup!")
 
     @commands.command()
     async def echo(self, ctx: commands.Context, *args) -> None:
