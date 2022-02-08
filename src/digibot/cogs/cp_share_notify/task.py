@@ -80,11 +80,21 @@ class CPTask:
             name = user["name"]
             member = self._server.get_member_named(name)
             greeting = random.choice(GREETINGS)
-            share_type = user["share_type"]
             event = user["event"]
 
             # send direct message
-            dm = f"{greeting} {name},\n\nJust a quick reminder that today is your scheduled day to share a **{share_type}** for DigiSoc's **{event}** event!\n\nHot tip: prime time for sharing seems to be around 7-9pm, and event CP's can be found on the Trello board :grin:"
+            dm = f"""{greeting} {name},
+Just a quick reminder that today is your scheduled day to share DigiSoc's **{event}** event!
+
+The prime time to change CP and share is 7-11 PM
+You have the option to
+1. Share CP (Write a short caption which includes the event link and rego link.)
+2. Share Facebook Event (Write a short caption which includes the rego link.)
+3. Invite 5 Friends
+4. Create a Meme (Write a short caption which includes the event link, rego link, date and time)
+
+Event CP's can be found on the Trello board :grin:"""
+
             try:
                 await member.send(dm)
                 print(f"Successfully sent reminder to {name}")

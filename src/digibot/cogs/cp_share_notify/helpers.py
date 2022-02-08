@@ -28,7 +28,6 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
         schedule (dict): maps date (str) -> list of users (dict) where users (dict):
             name (str: str)
             event (str: str)
-            share_type (str: str)
     """
     schedule = defaultdict(list)
 
@@ -64,58 +63,50 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
     ]
     # df.head()
 
-    # remove PRIME TIME rows
-    condition = df["Event Info"] != "PRIME TIME"
-    df = df[condition]
-
     # iterate through rows to extract data
+    scan_date = False
     current_dates = None
-    current_type = None
     prev_event = None
 
     for row in df.values:
         event_info = row[0]
         cell_values = row[1:]
         is_empty_event = pd.isnull(event_info)
-        is_empty_cells = all(pd.isnull(cell) for cell in cell_values)
 
-        if is_empty_cells and is_empty_event:
-            # end of date section (full null row)
-            current_dates = []
+        # reset and scan date next iteration
+        if event_info == "PRIME TIME":
+            current_dates = None
+            prev_event = None
+            scan_date = True
+            continue
 
-        elif is_empty_cells:
-            # start of new event type (remaining cells null)
-            current_type = event_info
-
-        elif all(
-            DATE_PATTERN.match(cell) is not None
-            for cell in cell_values
-            if not pd.isnull(cell)
-        ):
-            # check date row
+        # date row
+        elif scan_date:
             current_dates = cell_values
+            scan_date = False
+            continue
 
-        else:
-            # normal row
-            for day_index, name in enumerate(cell_values):
-                if not pd.isnull(name) and name != "EVENT DAY":
-                    share_date = current_dates[day_index]
-                    print(
-                        name,
-                        share_date,
-                        event_info if not is_empty_event else prev_event,
-                        current_type,
-                    )
-                    # add to schedule
-                    schedule[share_date].append(
-                        {
-                            "name": name,
-                            "event": event_info if not is_empty_event else prev_event,
-                            "share_type": current_type,
-                        }
-                    )
-            if not is_empty_event:
-                prev_event = event_info
+        # normal row
+        for day_index, name in enumerate(cell_values):
+            if not pd.isnull(name) and name != "EVENT DAY":
+                share_date = current_dates[day_index]
+                # print(
+                #     name,
+                #     share_date,
+                #     event_info if not is_empty_event else prev_event,
+                # )
+
+                # add to schedule
+                schedule[share_date].append(
+                    {
+                        "name": name,
+                        "event": event_info if not is_empty_event else prev_event,
+                    }
+                )
+
+        # rows without events
+        if not is_empty_event:
+            prev_event = event_info
 
     # sort users for each day by name
     for users in schedule.values():
