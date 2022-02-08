@@ -57,10 +57,7 @@ class CPNotifier(commands.Cog):
 
         # add fields
         for day, users in schedule.items():
-            users_info = (
-                f"**{user['name']}:** {user['event']} ({user['share_type']})"
-                for user in users
-            )
+            users_info = (f"**{user['name']}:** {user['event']}" for user in users)
             embed.add_field(name=day, value="\n".join(users_info))
 
         embed.set_footer(text="DigiBot CP Share Automation - https://github.com/axieax")
