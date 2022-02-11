@@ -27,12 +27,11 @@ class CPTask:
         self,
         schedule: SCHEDULE_TYPE,
         server: discord.Guild = None,
-        active: bool = False,
     ):
         """Constructor for CPShare Notifier Task class"""
         self._schedule: SCHEDULE_TYPE = schedule
         self._server: discord.Guild = server
-        self._active: bool = active
+        self._active: bool = schedule != {}
         self.schedule_job()
 
     def schedule_job(self) -> None:
