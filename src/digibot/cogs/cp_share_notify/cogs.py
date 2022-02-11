@@ -1,15 +1,17 @@
 """ Module Imports """
 import os
+import json
 
 import discord
 from discord.ext import commands
 
 """ Helper Imports """
-from src.digibot.cogs.cp_share_notify.helpers import (SCHEDULE_TYPE,
-                                                      parse_schedule)
+from src.digibot.cogs.cp_share_notify.helpers import SCHEDULE_TYPE, parse_schedule
 from src.digibot.cogs.cp_share_notify.task import CPTask
 
 """ Constants """
+SCHEDULE_PERSISTENCE_JSON = "schedule.json"
+
 SCHEDULES_DIR = "src/digibot/cogs/cp_share_notify/schedules"
 if not os.path.exists(SCHEDULES_DIR):
     os.mkdir(SCHEDULES_DIR)
@@ -24,7 +26,13 @@ class CPNotifier(commands.Cog):
 
     def __init__(self, client: commands.Bot) -> None:
         self._client: commands.Bot = client
-        self._task: CPTask = CPTask({})
+        if not os.path.exists(SCHEDULE_PERSISTENCE_JSON):
+            schedule = {}
+        else:
+            with open(SCHEDULE_PERSISTENCE_JSON, "r") as f:
+                schedule = json.load(f)
+        print(schedule)
+        self._task: CPTask = CPTask(schedule)
 
     def is_active(self) -> bool:
         """Returns whether a CPNotifier has an active CPTask"""
@@ -118,6 +126,8 @@ class CPNotifier(commands.Cog):
             self._task.set_schedule(schedule)
             self._task.set_server(server)
             self._task.set_status(True)
+            with open(SCHEDULE_PERSISTENCE_JSON, "w") as f:
+                json.dump(schedule, f, indent=2)
         except Exception as e:
             print(e)
             # raise
