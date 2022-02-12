@@ -1,22 +1,31 @@
 """ Module Imports """
 import re
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, TypedDict
 
 import pandas as pd
 
 """ Constants """
 DATE_FORMAT = "%Y-%m-%d"
 DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
-# NOTE: to support python versions < 3.9
-# SCHEDULE_TYPE = dict[str, list[dict[str, str]]]
-SCHEDULE_TYPE = Dict[str, List[Dict[str, str]]]
-
 ROW_AXIS = 0
 COLUMN_AXIS = 1
 
 
-def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
+class ScheduleEntry(TypedDict):
+    """
+    A typed dictionary for a schedule entry
+    """
+
+    name: str
+    event: str
+    server_id: int
+
+
+SCHEDULE_TYPE = Dict[str, ScheduleEntry]
+
+
+def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
     """
     Parses a given CPShare schedule and returns a dictionary which maps dates (key)
     to a list of dictionaries (value) containing CP sharer information
@@ -26,8 +35,9 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
 
     Returns:
         schedule (dict): maps date (str) -> list of users (dict) where users (dict):
-            name (str: str)
-            event (str: str)
+            name (str)
+            event (str)
+            server_id (int)
     """
     schedule = defaultdict(list)
 
@@ -90,17 +100,18 @@ def parse_schedule(file_name: str) -> SCHEDULE_TYPE:
         for day_index, name in enumerate(cell_values):
             if not pd.isnull(name) and name != "EVENT DAY":
                 share_date = current_dates[day_index]
-                # print(
-                #     name,
-                #     share_date,
-                #     event_info if not is_empty_event else prev_event,
-                # )
+                print(
+                    name,
+                    share_date,
+                    event_info if not is_empty_event else prev_event,
+                )
 
                 # add to schedule
                 schedule[share_date].append(
                     {
                         "name": name,
                         "event": event_info if not is_empty_event else prev_event,
+                        "server_id": server_id,
                     }
                 )
 
