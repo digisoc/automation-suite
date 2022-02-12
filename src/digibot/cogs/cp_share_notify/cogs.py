@@ -1,12 +1,13 @@
 """ Module Imports """
-import os
 import json
+import os
 
 import discord
 from discord.ext import commands
 
 """ Helper Imports """
-from src.digibot.cogs.cp_share_notify.helpers import SCHEDULE_TYPE, parse_schedule
+from src.digibot.cogs.cp_share_notify.helpers import (SCHEDULE_TYPE,
+                                                      parse_schedule)
 from src.digibot.cogs.cp_share_notify.task import CPTask
 
 """ Constants """
@@ -31,8 +32,8 @@ class CPNotifier(commands.Cog):
         else:
             with open(SCHEDULE_PERSISTENCE_JSON, "r") as f:
                 schedule = json.load(f)
-        print(schedule)
-        self._task: CPTask = CPTask(schedule)
+        print(f"{schedule=}")
+        self._task: CPTask = CPTask(schedule, client)
 
     def is_active(self) -> bool:
         """Returns whether a CPNotifier has an active CPTask"""
@@ -93,15 +94,15 @@ class CPNotifier(commands.Cog):
         is_success = False
         message_reference = ctx.message.reference
         if message_reference:
-            is_success = await self._notifier_set(message_reference.resolved, ctx.guild)
+            is_success = await self._notifier_set(
+                message_reference.resolved, ctx.guild.id
+            )
         else:
-            is_success = await self._notifier_set(ctx.message, ctx.guild)
+            is_success = await self._notifier_set(ctx.message, ctx.guild.id)
 
         await ctx.message.add_reaction("✅" if is_success else "❌")
 
-    async def _notifier_set(
-        self, message: discord.Message, server: discord.Guild
-    ) -> bool:
+    async def _notifier_set(self, message: discord.Message, server_id: int) -> bool:
         """
         Extract and parse .csv CPShare Schedule file in given message
 
@@ -122,9 +123,8 @@ class CPNotifier(commands.Cog):
 
         # parse schedule and create Notifier Task
         try:
-            schedule = parse_schedule(file_name)
+            schedule = parse_schedule(file_name, server_id)
             self._task.set_schedule(schedule)
-            self._task.set_server(server)
             self._task.set_status(True)
             with open(SCHEDULE_PERSISTENCE_JSON, "w") as f:
                 json.dump(schedule, f, indent=2)
@@ -132,7 +132,6 @@ class CPNotifier(commands.Cog):
             print(e)
             # raise
             return False
-
         return True
 
     @commands.command()

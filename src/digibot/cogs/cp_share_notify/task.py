@@ -4,10 +4,14 @@ import random
 import time
 from datetime import date
 from threading import Thread
+from typing import DefaultDict
 
 import discord
 import schedule
+from discord.ext import commands
 from discord.utils import get
+
+from src.digibot.cogs.event_thread.cogs import REQUESTS_CHANNEL
 
 """ Import Helpers """
 from src.digibot.cogs.cp_share_notify.helpers import DATE_FORMAT, SCHEDULE_TYPE
@@ -26,11 +30,11 @@ class CPTask:
     def __init__(
         self,
         schedule: SCHEDULE_TYPE,
-        server: discord.Guild = None,
+        client: commands.Bot,
     ):
         """Constructor for CPShare Notifier Task class"""
         self._schedule: SCHEDULE_TYPE = schedule
-        self._server: discord.Guild = server
+        self._client: commands.Bot = client
         self._active: bool = schedule != {}
         self.schedule_job()
 
@@ -62,11 +66,12 @@ class CPTask:
             notify_date (str): users assigned to this date will be notified (OPTIONAL)
         """
         # ensure enabled
-        if not self._active or not self._schedule or not self._server:
+        if not self._active:
             return
 
         # notify users scheduled to CP share for given day
-        failures = []
+        servers = self._get_servers()
+        feedback = DefaultDict(lambda: DefaultDict(list))
         notify_date = notify_date or date.today().strftime(DATE_FORMAT)
         users_to_notify = self._schedule[notify_date]
         for user in users_to_notify:
@@ -77,7 +82,9 @@ class CPTask:
 
             # get message parameters
             name = user["name"]
-            member = self._server.get_member_named(name)
+            server_id = user["server_id"]
+            server = servers[server_id]
+            member = server.get_member_named(name)
             greeting = random.choice(GREETINGS)
             event = user["event"]
 
@@ -97,17 +104,43 @@ Event CP's can be found on the Trello board :grin:"""
             try:
                 await member.send(dm)
                 print(f"Successfully sent reminder to {name}")
+                feedback[server]["success"].append(name)
                 await asyncio.sleep(0.5)
-            except Exception as e:
-                failures.append(f"{name} - {e}")
+            except Exception:
+                feedback[server]["failures"].append(name)
 
-        # report failures to #requests
-        if failures:
-            request_channel = get(self._server.channels, name="requests")
-            failure_report = "\n\t".join(failures)
-            await request_channel.send(
-                f"**CPShare Notifier**\nThe following users were not successfully notified:\n{failure_report}"
-            )
+        # report status to #requests
+        for server, statuses in feedback.items():
+            success = statuses["success"]
+            failures = statuses["failures"]
+            if not success and not failures:
+                continue
+
+            fmt_char = "\n\t"
+            report = f"""
+**CPShare Notifier**
+Successfully sent reminders to:
+    {fmt_char.join(success)}
+Failed to send reminders to:
+    {fmt_char.join(failures)}"""
+            request_channel = get(server.channels, name="requests")
+            if request_channel is None:
+                print(f"Could not find #{REQUESTS_CHANNEL} channel in {server.name}")
+            else:
+                await request_channel.send(report)
+
+    def _get_servers(self) -> dict[int, discord.Guild]:
+        """
+        Gets all the servers the bot is in
+
+        Returns:
+            servers (dict): maps guild id (int) -> guild objects (discord.Guild)
+        """
+        guilds = self._client.guilds
+        servers = {}
+        for guild in guilds:
+            servers[guild.id] = guild
+        return servers
 
     def get_schedule(self) -> SCHEDULE_TYPE:
         """Getter for CPShare Notifier Task schedule"""
@@ -116,14 +149,6 @@ Event CP's can be found on the Trello board :grin:"""
     def set_schedule(self, schedule: SCHEDULE_TYPE) -> None:
         """Setter for CPShare Notifier Task schedule"""
         self._schedule = schedule
-
-    def get_server(self) -> discord.Guild:
-        """Getter for CPShare Notifier Task server"""
-        return self._server
-
-    def set_server(self, server: discord.Guild) -> None:
-        """Getter for CPShare Notifier Task server"""
-        self._server = server
 
     def get_status(self) -> bool:
         """Getter for CPShare Notifier Task active status"""
