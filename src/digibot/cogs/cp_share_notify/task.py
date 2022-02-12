@@ -4,7 +4,7 @@ import random
 import time
 from datetime import date
 from threading import Thread
-from typing import DefaultDict
+from typing import DefaultDict, Dict
 
 import discord
 import schedule
@@ -129,7 +129,7 @@ Failed to send reminders to:
             else:
                 await request_channel.send(report)
 
-    def _get_servers(self) -> dict[int, discord.Guild]:
+    def _get_servers(self) -> Dict[int, discord.Guild]:
         """
         Gets all the servers the bot is in
 
