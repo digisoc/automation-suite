@@ -117,17 +117,27 @@ Event CP's can be found on the Trello board :grin:"""
                 continue
 
             fmt_char = "\n\t"
-            report = f"""
-**CPShare Notifier**
-Successfully sent reminders to:
-    {fmt_char.join(success)}
-Failed to send reminders to:
-    {fmt_char.join(failures)}"""
+            success_report = (
+                f"Successfully sent reminders to:\n{fmt_char.join(success)}"
+                if success
+                else ""
+            )
+            failure_report = (
+                f"Failed to send reminders to:\n{fmt_char.join(failures)}"
+                if failures
+                else ""
+            )
+
+            report = success_report + "\n" + failure_report
+            if report.isspace():
+                continue
+
+            # send report to requests channel
             request_channel = get(server.channels, name="requests")
             if request_channel is None:
                 print(f"Could not find #{REQUESTS_CHANNEL} channel in {server.name}")
             else:
-                await request_channel.send(report)
+                await request_channel.send("**CPShare Notifier**\n" + report)
 
     def _get_servers(self) -> Dict[int, discord.Guild]:
         """
