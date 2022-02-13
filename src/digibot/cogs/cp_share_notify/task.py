@@ -12,14 +12,16 @@ from discord.ext import commands
 from discord.utils import get
 
 from src.digibot.cogs.event_thread.cogs import REQUESTS_CHANNEL
+from src.loop import get_loop
 
 """ Import Helpers """
 from src.digibot.cogs.cp_share_notify.helpers import DATE_FORMAT, SCHEDULE_TYPE
 
 """ Constants """
+# TODO: 30 minutes before PRIME time lower bound?
 NOTIFY_TIME = "18:30"
-MINUTE_TO_SEC = 60
-REFRESH_RATE = 5 * MINUTE_TO_SEC
+# Refresh every 60 seconds (1 minute)
+REFRESH_RATE = 60
 
 GREETINGS = ("Howdy", "Ni Hao", "Hola", "Bonjour", "Ciao", "Konichiwa", "Ola")
 
@@ -53,10 +55,9 @@ class CPTask:
     def schedule_job_sync(self) -> None:
         """Synchronous wrapper for schedule_notify"""
         # REF: https://stackoverflow.com/a/59645689
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.schedule_notify_async())
-        loop.close()
+        loop = get_loop()
+        future = asyncio.run_coroutine_threadsafe(self.schedule_notify_async(), loop)
+        future.result()
 
     async def schedule_notify_async(self, notify_date: str = "") -> None:
         """
@@ -133,7 +134,7 @@ Event CP's can be found on the Trello board :grin:"""
                 continue
 
             # send report to requests channel
-            request_channel = get(server.channels, name="requests")
+            request_channel = get(server.channels, name=REQUESTS_CHANNEL)
             if request_channel is None:
                 print(f"Could not find #{REQUESTS_CHANNEL} channel in {server.name}")
             else:

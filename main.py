@@ -3,6 +3,7 @@ import asyncio
 from threading import Thread
 
 from src.digibot.controller import start_discord_server
+from src.loop import start_client_loop
 from src.server import start_flask_server
 
 parser = argparse.ArgumentParser("DigiBot")
@@ -20,5 +21,4 @@ if __name__ == "__main__":
         t = Thread(target=start_flask_server)
         t.start()
     # start DigiBot
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_discord_server())
+    start_client_loop()
