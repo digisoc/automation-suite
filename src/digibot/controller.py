@@ -92,12 +92,3 @@ async def start_discord_server() -> None:
         exit(1)
     # start Discord client
     await client.start(token)
-
-
-if __name__ == "__main__":
-    # runs async function on event loop
-    import asyncio
-
-    # NOTE: python versions > 3.10: asyncio.get_event_loop replaced with asyncio.get_running_loop
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_discord_server())
