@@ -1,8 +1,8 @@
 import argparse
-import asyncio
+import os
+import time
 from threading import Thread
 
-from src.digibot.controller import start_discord_server
 from src.loop import start_client_loop
 from src.server import start_flask_server
 
@@ -16,6 +16,9 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    # set timezone
+    os.environ["TZ"] = "Australia/Sydney"
+    time.tzset()
     # start Flask server
     if args.flask:
         t = Thread(target=start_flask_server)
