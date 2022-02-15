@@ -161,6 +161,11 @@ Event CP's can be found on the Trello board :grin:"""
         """Setter for CPShare Notifier Task schedule"""
         self._schedule = schedule
 
+    def add_schedule(self, schedule: SCHEDULE_TYPE) -> None:
+        """Adds another schedule to the current CPShare Notifier Task schedule"""
+        for key, value in schedule.items():
+            self._schedule[key].extend(value)
+
     def get_status(self) -> bool:
         """Getter for CPShare Notifier Task active status"""
         return self._active

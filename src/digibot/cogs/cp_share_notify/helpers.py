@@ -1,7 +1,7 @@
 """ Module Imports """
 import re
 from collections import defaultdict
-from typing import Dict, TypedDict
+from typing import Dict, List, TypedDict
 
 import pandas as pd
 
@@ -22,7 +22,7 @@ class ScheduleEntry(TypedDict):
     server_id: int
 
 
-SCHEDULE_TYPE = Dict[str, ScheduleEntry]
+SCHEDULE_TYPE = Dict[str, List[ScheduleEntry]]
 
 
 def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
@@ -112,6 +112,7 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
                         "name": name,
                         "event": event_info if not is_empty_event else prev_event,
                         "server_id": server_id,
+                        "schedule_file": file_name,
                     }
                 )
 

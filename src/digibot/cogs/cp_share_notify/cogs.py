@@ -90,19 +90,37 @@ class CPNotifier(commands.Cog):
         Starts a notifier for an attached .csv CPShare Schedule
         (attach or reply to a message with an attached schedule)
         """
-        # determine type of request
+        await self.notifier_recurse(ctx, True)
+
+    @commands.command()
+    async def notifier_add(self, ctx: commands.Context) -> None:
+        """
+        Adds another schedule to the current CPShare Schedule
+        """
+        await self.notifier_recurse(ctx, False)
+
+    async def notifier_recurse(
+        self, ctx: commands.Context, override_existing_schedule: bool
+    ) -> None:
         is_success = False
         message_reference = ctx.message.reference
         if message_reference:
-            is_success = await self._notifier_set(
-                message_reference.resolved, ctx.guild.id
+            is_success = await self.notifier_update(
+                message_reference.resolved, ctx.guild.id, override_existing_schedule
             )
         else:
-            is_success = await self._notifier_set(ctx.message, ctx.guild.id)
+            is_success = await self.notifier_update(
+                ctx.message, ctx.guild.id, override_existing_schedule
+            )
 
         await ctx.message.add_reaction("✅" if is_success else "❌")
 
-    async def _notifier_set(self, message: discord.Message, server_id: int) -> bool:
+    async def notifier_update(
+        self,
+        message: discord.Message,
+        server_id: int,
+        override_existing_schedule: bool,
+    ) -> bool:
         """
         Extract and parse .csv CPShare Schedule file in given message
 
@@ -124,7 +142,10 @@ class CPNotifier(commands.Cog):
         # parse schedule and create Notifier Task
         try:
             schedule = parse_schedule(file_name, server_id)
-            self._task.set_schedule(schedule)
+            if override_existing_schedule:
+                self._task.set_schedule(schedule)
+            else:
+                self._task.add_schedule(schedule)
             self._task.set_status(True)
             with open(SCHEDULE_PERSISTENCE_JSON, "w") as f:
                 json.dump(schedule, f, indent=2)
