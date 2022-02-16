@@ -117,16 +117,13 @@ Event CP's can be found on the Trello board :grin:"""
             if not success and not failures:
                 continue
 
-            fmt_char = "\n\t"
+            success_names = "\n".join("\t" + name for name in success)
             success_report = (
-                f"Successfully sent reminders to:\n{fmt_char.join(success)}"
-                if success
-                else ""
+                f"Successfully sent reminders to:\n{success_names}" if success else ""
             )
+            failure_names = "\n".join("\t" + name for name in failures)
             failure_report = (
-                f"Failed to send reminders to:\n{fmt_char.join(failures)}"
-                if failures
-                else ""
+                f"Failed to send reminders to:\n{failure_names}" if failures else ""
             )
 
             report = success_report + "\n" + failure_report
