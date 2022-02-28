@@ -245,6 +245,15 @@ const createRegistrationForm = (eventName) => {
     ])
     .showOtherOption(true)
     .setRequired(true);
+  // add Arc member field
+  form
+    .addMultipleChoiceItem()
+    .setTitle("Are you an Arc member?")
+    .setChoiceValues([
+      "Yes",
+      "No",
+    ])
+    .setRequired(true);
 
   // connect form to spreadsheet
   const sheetName = `${eventName} Registration Responses`;
