@@ -27,7 +27,7 @@ const hideEmptyRows = true;
 // [TODO]: Paste the ID of the Google Drive folder for storing forms and responses (https://drive.google.com/drive/folders/[driveID])
 const driveID = "";
 // [COMPLETED]: Index of the field containing the event name (0-indexed)
-const formEventNameIndex = 4;
+const formEventNameIndex = 2;
 
 /*
   DO NOT MODIFY BELOW
