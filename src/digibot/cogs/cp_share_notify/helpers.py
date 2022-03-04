@@ -44,7 +44,7 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
     # import schedule
     df = pd.read_csv(file_name)
 
-    # remove rows from end
+    # remove empty rows from end
     rows_to_drop = 0
     encountered_empty = False
     for row in df.values[::-1]:
@@ -57,11 +57,11 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
 
     df = df.head(-rows_to_drop)
 
-    # remove extra columns
+    # remove fully empty columns
     df = df.dropna(how="all", axis=COLUMN_AXIS)
 
     # label columns
-    df.columns = [
+    column_labels = [
         "Event Info",
         "Monday",
         "Tuesday",
@@ -71,7 +71,9 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
         "Saturday",
         "Sunday",
     ]
-    # df.head()
+    # remove extra columns on the RHS
+    df = df.iloc[:, :len(column_labels)]
+    df.columns = column_labels
 
     # iterate through rows to extract data
     scan_date = False
@@ -84,9 +86,12 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
         is_empty_event = pd.isnull(event_info)
 
         # reset and scan date next iteration
+        # PRIME TIME is used to indicate start of new week
         if event_info == "PRIME TIME":
             current_dates = None
             prev_event = None
+            # date info is on the row after PRIME TIME
+            # so toggle scan date to scan next iter
             scan_date = True
             continue
 
@@ -116,7 +121,8 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
                     }
                 )
 
-        # rows without events
+        # store current event info for when
+        # the row doesn't have any event info
         if not is_empty_event:
             prev_event = event_info
 
