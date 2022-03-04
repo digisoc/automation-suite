@@ -11,7 +11,7 @@ import schedule
 from discord.ext import commands
 from discord.utils import get
 
-from src.digibot.cogs.event_thread.cogs import REQUESTS_CHANNEL
+from src.digibot.cogs.event_thread.cogs import DEV_CHANNEL
 from src.loop import get_loop
 
 """ Import Helpers """
@@ -110,7 +110,7 @@ Event CP's can be found on the Trello board :grin:"""
             except Exception:
                 feedback[server]["failures"].append(name)
 
-        # report status to #requests
+        # report status to #dev
         for server, statuses in feedback.items():
             success = statuses["success"]
             failures = statuses["failures"]
@@ -130,12 +130,12 @@ Event CP's can be found on the Trello board :grin:"""
             if report.isspace():
                 continue
 
-            # send report to requests channel
-            request_channel = get(server.channels, name=REQUESTS_CHANNEL)
-            if request_channel is None:
-                print(f"Could not find #{REQUESTS_CHANNEL} channel in {server.name}")
+            # send report to dev channel
+            dev_channel = get(server.channels, name=DEV_CHANNEL)
+            if dev_channel is None:
+                print(f"Could not find #{DEV_CHANNEL} channel in {server.name}")
             else:
-                await request_channel.send("**CPShare Notifier**\n" + report)
+                await dev_channel.send("**CPShare Notifier**\n" + report)
 
     def _get_servers(self) -> Dict[int, discord.Guild]:
         """

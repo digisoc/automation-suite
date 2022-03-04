@@ -7,7 +7,7 @@ from src.digibot.cogs.event_thread.destroy import archive_channel
 from src.digibot.cogs.event_thread.setup import forward_request
 
 """ Constants """
-REQUESTS_CHANNEL = "requests"
+DEV_CHANNEL = "dev"
 
 
 class EventThread(commands.Cog):
@@ -17,10 +17,10 @@ class EventThread(commands.Cog):
         """Constructor for Event Thread Cog"""
         self._client: commands.Bot = client
 
-    def _is_from_requests_channel(self, ctx: commands.Context) -> bool:
-        """Checks if an incoming message originates from the requests channel"""
+    def _is_from_dev_channel(self, ctx: commands.Context) -> bool:
+        """Checks if an incoming message originates from the dev channel"""
         if isinstance(ctx.channel, discord.channel.TextChannel):
-            return ctx.channel.name == REQUESTS_CHANNEL
+            return ctx.channel.name == DEV_CHANNEL
         return False  # e.g. discord.channel.DMChannel
 
     def _is_webhook_request(self, ctx: commands.Context) -> bool:
@@ -30,11 +30,11 @@ class EventThread(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, ctx: commands.Context) -> None:
         """
-        Listener for incoming Forms to Discord requests
+        Listener for incoming Forms to Discord dev
         https://github.com/axieax/google-forms-to-discord/
         """
         # check channel
-        if not self._is_from_requests_channel(ctx):
+        if not self._is_from_dev_channel(ctx):
             return
 
         # check webhook request
@@ -49,10 +49,10 @@ class EventThread(commands.Cog):
     async def redo(self, ctx: commands.Context) -> None:
         """Manually creates an event thread from a referenced response"""
         # check channel
-        if not self._is_from_requests_channel(ctx):
+        if not self._is_from_dev_channel(ctx):
             await ctx.message.add_reaction("❌")
             await ctx.reply(
-                "Redo command must be invoked from the #requests text channel"
+                "Redo command must be invoked from the #dev text channel"
             )
             return
 
