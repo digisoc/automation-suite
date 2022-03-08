@@ -26,6 +26,8 @@ const hideEmptyRows = true;
 
 // [TODO]: Paste the ID of the Google Drive folder for storing forms and responses (https://drive.google.com/drive/folders/[driveID])
 const driveID = "";
+// [TODO]: DigiSoc SpArc Club link
+const sparcURL = "";
 // [COMPLETED]: Index of the field containing the event name (0-indexed)
 const formEventNameIndex = 2;
 
@@ -200,8 +202,7 @@ const zIDValidation = FormApp.createTextValidation()
 // add default fields (name, email, zID) to a form
 const addDefaultFields = (form) => {
   // add name fields
-  form.addTextItem().setTitle("First name").setRequired(true);
-  form.addTextItem().setTitle("Last name").setRequired(true);
+  form.addTextItem().setTitle("Name").setRequired(true);
   // add email field
   form
     .addTextItem()
@@ -214,22 +215,6 @@ const addDefaultFields = (form) => {
     .setTitle("zID")
     .setValidation(zIDValidation)
     .setRequired(true);
-};
-
-// create registration form
-const createRegistrationForm = (eventName) => {
-  // create and setup new form
-  const formName = `${eventName} Registration Form`;
-  const form = FormApp.create(formName)
-    .setDescription(
-      `Please fill in your details below to register for ${eventName}!`
-    )
-    .setConfirmationMessage(
-      "Thanks for registering! We hope to see you at our event!"
-    )
-    .setAllowResponseEdits(true);
-  // add name, email and zID fields to form
-  addDefaultFields(form);
   // add degree field
   form.addTextItem().setTitle("Degree").setRequired(true);
   // add year field
@@ -245,6 +230,33 @@ const createRegistrationForm = (eventName) => {
     ])
     .showOtherOption(true)
     .setRequired(true);
+  // add Arc member field
+  form
+    .addMultipleChoiceItem()
+    .setTitle("Are you an Arc member?")
+    .setChoiceValues(["Yes", "No"])
+    .setRequired(true);
+};
+
+// create registration form
+const createRegistrationForm = (eventName) => {
+  // create and setup new form
+  const formName = `${eventName} Registration Form`;
+  const form = FormApp.create(formName)
+    .setDescription(
+      `Please fill in your details below to register for ${eventName}!`
+    )
+    .setConfirmationMessage(
+      `Thanks for registering! We hope to see you at our event soon!!\nPlease make sure you're joined us on SpArc as well:\n${sparcURL}`
+    )
+    .setAllowResponseEdits(true);
+  // add default fields
+  addDefaultFields(form);
+  // add field for additional questions
+  form
+    .addTextItem()
+    .setTitle("Do you have any questions for our presenter(s)?")
+    .setRequired(false);
 
   // connect form to spreadsheet
   const sheetName = `${eventName} Registration Responses`;
@@ -265,15 +277,12 @@ const createAttendanceForm = (eventName) => {
     .setDescription(
       `Please fill in your details below to confirm your attendance for ${eventName}!`
     )
-    .setConfirmationMessage("Thanks for attending our event!")
+    .setConfirmationMessage(
+      `Thanks for attending our event!\nPlease make sure you're joined us on SpArc as well:\n${sparcURL}`
+    )
     .setAllowResponseEdits(true);
-  // add name, email and zID fields to form
+  // add default fields
   addDefaultFields(form);
-  // add field for additional questions
-  form
-    .addTextItem()
-    .setTitle("Do you have any questions for our presenter?")
-    .setRequired(false);
 
   // connect form to spreadsheet
   const sheetName = `${eventName} Attendance Responses`;
