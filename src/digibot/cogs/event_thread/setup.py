@@ -1,6 +1,8 @@
 """ Module Imports """
+import json
 import discord
 from discord.utils import get
+import requests
 
 """ Helper Imports """
 from src.digibot.utils import debug
@@ -51,11 +53,38 @@ async def forward_request(message: discord.Message) -> None:
     )
 
     # forward google forms to discord notification embed and created forms
-    form_details = message.content
+    form_details = json.loads(message.content)
+    form_info = format_forms(form_details)
+    qr_img = extract_qr_code(form_details["attendance"]["public"], channel_name)
+
     status = f"A new channel has been automatically set up for {event_name}!\n"
     forwarded_message = await new_channel.send(
-        content=status + form_details, embed=embed
+        content=status + form_info, embed=embed, file=qr_img
     )
     await forwarded_message.pin()
 
     print(status)
+
+def format_forms(form_details: dict) -> str:
+    registration_form = form_details["registration"]
+    attendance_form = form_details["attendance"]
+    return f"""
+📝 **Registration Form:**
+  - Public URL: <{registration_form["public"]}>
+  - Editor URL: <{registration_form["editor"]}>
+  - Responses: <{registration_form["responses"]}>
+📝 **Attendance Form**:
+  - Public URL: <{attendance_form["public"]}>
+  - Editor URL: <{attendance_form["editor"]}>
+  - Responses: <{attendance_form["responses"]}>
+
+"""
+
+def extract_qr_code(url: str, channel_name: str) -> discord.File:
+    req = requests.get("https://qrcode.show/" + url, headers={"Accept": "image/png"})
+    TEMP_FILE = f"/tmp/{channel_name}-qr.png"
+    with open(TEMP_FILE, "wb") as f:
+        f.write(req.content)
+    with open(TEMP_FILE, "rb") as f:
+        return discord.File(f, filename="qr.png")
+
