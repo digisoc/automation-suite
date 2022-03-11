@@ -68,20 +68,20 @@ const submitPost = (e) => {
   const [registrationForm, registrationSheet] =
     createRegistrationForm(eventName);
   const [attendanceForm, attendanceSheet] = createAttendanceForm(eventName);
-  const formDetails = `
-📝 **Registration Form:**
-  - Public URL: <${registrationForm.shortenFormUrl(
-    registrationForm.getPublishedUrl()
-  )}>
-  - Editor URL: <${registrationForm.getEditUrl()}>
-  - Responses: <${registrationSheet.getUrl()}>
-📝 **Attendance Form**:
-  - Public URL: <${attendanceForm.shortenFormUrl(
-    attendanceForm.getPublishedUrl()
-  )}>
-  - Editor URL: <${attendanceForm.getEditUrl()}>
-  - Responses: <${attendanceSheet.getUrl()}>
-  `;
+  const formDetails = {
+    registration: {
+      public: registrationForm.shortenFormUrl(
+        registrationForm.getPublishedUrl()
+      ),
+      editor: registrationForm.getEditUrl(),
+      responses: registrationSheet.getUrl(),
+    },
+    attendance: {
+      public: attendanceForm.shortenFormUrl(registrationForm.getPublishedUrl()),
+      editor: attendanceForm.getEditUrl(),
+      responses: attendanceSheet.getUrl(),
+    },
+  };
 
   // create POST request to webhook
   const options = {
@@ -93,7 +93,7 @@ const submitPost = (e) => {
       username: "Response Carrier",
       avatar_url:
         "https://github.com/axieax/google-forms-to-discord/blob/main/assets/birb.jpg?raw=true",
-      content: formDetails,
+      content: JSON.stringify(formDetails),
       embeds: [embed],
     }),
   };
