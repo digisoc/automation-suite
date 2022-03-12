@@ -77,7 +77,7 @@ const submitPost = (e) => {
       responses: registrationSheet.getUrl(),
     },
     attendance: {
-      public: attendanceForm.shortenFormUrl(registrationForm.getPublishedUrl()),
+      public: attendanceForm.shortenFormUrl(attendanceForm.getPublishedUrl()),
       editor: attendanceForm.getEditUrl(),
       responses: attendanceSheet.getUrl(),
     },
