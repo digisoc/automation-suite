@@ -74,7 +74,7 @@ class CPTask:
         servers = self._get_servers()
         feedback = DefaultDict(lambda: DefaultDict(list))
         notify_date = notify_date or date.today().strftime(DATE_FORMAT)
-        users_to_notify = self._schedule[notify_date]
+        users_to_notify = self._schedule.get(notify_date, [])
         for user in users_to_notify:
             # error check
             if not user:
