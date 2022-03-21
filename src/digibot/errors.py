@@ -1,0 +1,2 @@
+class CommandDiagnostic(Exception):
+    pass

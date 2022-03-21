@@ -9,6 +9,7 @@ from discord.ext import commands
 from src.digibot.cogs.cp_share_notify.helpers import (SCHEDULE_TYPE,
                                                       parse_schedule)
 from src.digibot.cogs.cp_share_notify.task import CPTask
+from src.digibot.errors import CommandDiagnostic
 
 """ Constants """
 SCHEDULE_PERSISTENCE_JSON = "schedule.json"
@@ -102,25 +103,27 @@ class CPNotifier(commands.Cog):
     async def notifier_recurse(
         self, ctx: commands.Context, override_existing_schedule: bool
     ) -> None:
-        is_success = False
-        message_reference = ctx.message.reference
-        if message_reference:
-            is_success = await self.notifier_update(
-                message_reference.resolved, ctx.guild.id, override_existing_schedule
-            )
-        else:
-            is_success = await self.notifier_update(
-                ctx.message, ctx.guild.id, override_existing_schedule
-            )
-
-        await ctx.message.add_reaction("✅" if is_success else "❌")
+        try:
+            message_reference = ctx.message.reference
+            if message_reference:
+                await self.notifier_update(
+                    message_reference.resolved, ctx.guild.id, override_existing_schedule
+                )
+            else:
+                await self.notifier_update(
+                    ctx.message, ctx.guild.id, override_existing_schedule
+                )
+            await ctx.message.add_reaction("✅")
+        except CommandDiagnostic as e:
+            await ctx.message.reply(str(e))
+            await ctx.message.add_reaction("❌")
 
     async def notifier_update(
         self,
         message: discord.Message,
         server_id: int,
         override_existing_schedule: bool,
-    ) -> bool:
+    ) -> None:
         """
         Extract and parse .csv CPShare Schedule file in given message
 
@@ -129,18 +132,14 @@ class CPNotifier(commands.Cog):
         """
         if not message.attachments:
             # message does not contain any attachments
-            await message.reply(
-                "Please ensure the schedule is attached to this message"
-            )
-            return False
+            raise CommandDiagnostic("Please ensure the schedule is attached to this message")
 
         # validate and save csv attachment
         attachment = message.attachments[0]
         file_name = f"{SCHEDULES_DIR}/{attachment.filename}"
         if not file_name.endswith(".csv"):
             # NOTE: may need file validation to confirm csv contents
-            await message.reply("Please attach a valid .csv file")
-            return False
+            raise CommandDiagnostic("Please attach a valid .csv file")
         await attachment.save(file_name)
 
         # parse schedule and create Notifier Task
@@ -156,11 +155,8 @@ class CPNotifier(commands.Cog):
         except Exception as e:
             print(e)
             # raise
-            await message.reply(
-                "Could not parse schedule. Please check schedule format before informing IT."
-            )
-            return False
-        return True
+            raise CommandDiagnostic("Could not parse schedule")
+            # TODO: log Exception to #requests channel
 
     @commands.command()
     async def notifier_disable(self, ctx: commands.Context) -> None:
