@@ -129,6 +129,9 @@ class CPNotifier(commands.Cog):
         """
         if not message.attachments:
             # message does not contain any attachments
+            await message.reply(
+                "Please ensure the schedule is attached to this message"
+            )
             return False
 
         # validate and save csv attachment
@@ -136,6 +139,7 @@ class CPNotifier(commands.Cog):
         file_name = f"{SCHEDULES_DIR}/{attachment.filename}"
         if not file_name.endswith(".csv"):
             # NOTE: may need file validation to confirm csv contents
+            await message.reply("Please attach a valid .csv file")
             return False
         await attachment.save(file_name)
 
@@ -152,6 +156,9 @@ class CPNotifier(commands.Cog):
         except Exception as e:
             print(e)
             # raise
+            await message.reply(
+                "Could not parse schedule. Please check schedule format before informing IT."
+            )
             return False
         return True
 
