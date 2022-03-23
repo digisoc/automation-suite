@@ -97,8 +97,7 @@ The prime time to change CP and share is 7-11 PM
 You have the option to
 1. Share CP (Write a short caption which includes the event link and rego link.)
 2. Share Facebook Event (Write a short caption which includes the rego link.)
-3. Invite 5 Friends
-4. Create a Meme (Write a short caption which includes the event link, rego link, date and time)
+3. Create a Meme (Write a short caption which includes the event link, rego link, date and time)
 
 Event CP's can be found on the Trello board :grin:"""
 
