@@ -6,8 +6,7 @@ import discord
 from discord.ext import commands
 
 """ Helper Imports """
-from src.digibot.cogs.cp_share_notify.helpers import (SCHEDULE_TYPE,
-                                                      parse_schedule)
+from src.digibot.cogs.cp_share_notify.helpers import SCHEDULE_TYPE, parse_schedule
 from src.digibot.cogs.cp_share_notify.task import CPTask
 from src.digibot.errors import CommandDiagnostic
 
@@ -132,7 +131,9 @@ class CPNotifier(commands.Cog):
         """
         if not message.attachments:
             # message does not contain any attachments
-            raise CommandDiagnostic("Please ensure the schedule is attached to this message")
+            raise CommandDiagnostic(
+                "Please ensure the schedule is attached to this message"
+            )
 
         # validate and save csv attachment
         attachment = message.attachments[0]
@@ -145,6 +146,12 @@ class CPNotifier(commands.Cog):
         # parse schedule and create Notifier Task
         try:
             schedule = parse_schedule(file_name, server_id)
+        except Exception as e:
+            print(e)
+            # raise
+            raise CommandDiagnostic("Could not parse schedule")
+            # TODO: log Exception to #requests channel
+        else:
             if override_existing_schedule:
                 self._task.set_schedule(schedule)
             else:
@@ -152,11 +159,6 @@ class CPNotifier(commands.Cog):
             self._task.set_status(True)
             with open(SCHEDULE_PERSISTENCE_JSON, "w") as f:
                 json.dump(schedule, f, indent=2)
-        except Exception as e:
-            print(e)
-            # raise
-            raise CommandDiagnostic("Could not parse schedule")
-            # TODO: log Exception to #requests channel
 
     @commands.command()
     async def notifier_disable(self, ctx: commands.Context) -> None:

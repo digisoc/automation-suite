@@ -72,7 +72,7 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
         "Sunday",
     ]
     # remove extra columns on the RHS
-    df = df.iloc[:, :len(column_labels)]
+    df = df.iloc[:, : len(column_labels)]
     df.columns = column_labels
 
     # iterate through rows to extract data
@@ -131,3 +131,9 @@ def parse_schedule(file_name: str, server_id: int) -> SCHEDULE_TYPE:
         users.sort(key=lambda user: user["name"])
 
     return schedule
+
+
+if __name__ == "__main__":
+    TEST_CSV_FILE = "test_schedule.csv"
+    schedule = parse_schedule(TEST_CSV_FILE, -1)
+    print(f"{schedule=}")

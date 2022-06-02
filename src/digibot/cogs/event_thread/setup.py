@@ -1,8 +1,9 @@
 """ Module Imports """
 import json
+
 import discord
-from discord.utils import get
 import requests
+from discord.utils import get
 
 """ Helper Imports """
 from src.digibot.utils import debug
@@ -65,6 +66,7 @@ async def forward_request(message: discord.Message) -> None:
 
     print(status)
 
+
 def format_forms(form_details: dict) -> str:
     registration_form = form_details["registration"]
     attendance_form = form_details["attendance"]
@@ -80,6 +82,7 @@ def format_forms(form_details: dict) -> str:
 
 """
 
+
 def extract_qr_code(url: str, channel_name: str) -> discord.File:
     req = requests.get("https://qrcode.show/" + url, headers={"Accept": "image/png"})
     TEMP_FILE = f"/tmp/{channel_name}-qr.png"
@@ -87,4 +90,3 @@ def extract_qr_code(url: str, channel_name: str) -> discord.File:
         f.write(req.content)
     with open(TEMP_FILE, "rb") as f:
         return discord.File(f, filename="qr.png")
-
