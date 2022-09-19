@@ -7,7 +7,7 @@ from threading import Thread
 from typing import DefaultDict, Dict
 
 import discord
-import schedule
+import aioschedule as schedule
 from discord.ext import commands
 from discord.utils import get
 
@@ -40,16 +40,19 @@ class CPTask:
         self._active: bool = schedule != {}
         self.schedule_job()
 
+    def handleThread(self):
+        asyncio.run(self._schedule_job())
+
     def schedule_job(self) -> None:
         """Starts a Notifier Job on a separate thread"""
-        t = Thread(target=self._schedule_job)
+        t = Thread(target=self.handleThread)
         t.start()
 
-    def _schedule_job(self) -> None:
+    async def _schedule_job(self) -> None:
         """Schedules a daily Notifier Job for the requested NOTIFY_TIME"""
-        schedule.every().day.at(NOTIFY_TIME).do(self.schedule_job_sync)
+        schedule.every().day.at(NOTIFY_TIME).do(self.schedule_notify_async)
         while True:
-            schedule.run_pending()
+            await schedule.run_pending()
             time.sleep(REFRESH_RATE)
 
     def schedule_job_sync(self) -> None:
