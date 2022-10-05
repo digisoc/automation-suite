@@ -5,15 +5,43 @@ import os
 import discord
 from discord.ext import commands
 
-complete = ['asha', 'ryan']
+complete = ['@asha', '@axieax']
 GREETINGS = ("Howdy", "Ni Hao", "Hola", "Bonjour", "Ciao", "Konichiwa", "Ola")
 
 class When2Meet(commands.Cog):
     """When2Meet Notifier"""
     def __init__(self, client: commands.Bot) -> None:
         self._client: commands.Bot = client
-    
-    def _get_servers(self) -> Dict[int, discord.Guild]:
+
+    @commands.command()
+    async def when2meet(self, ctx: commands.Context, url, frequency, users: commands.Greedy[discord.User]) -> None:
+        """Reminds members who haven't responded to a when2meet to do so"""
+        await ctx.message.add_reaction("✅")
+        users_names = []
+        servers = self._get_servers()
+        # append all server profile names to member_names
+        for user in users:
+
+            # error check
+            if not user:
+                print("Invalid user detected in users")
+                continue
+
+            name = user.name
+            server_id = user.server_id
+            server = servers.server_id
+            member = server.get_member_named(name)
+            users_names.append(member)
+        print(users_names)
+        # for member in members:
+        #     try:
+        #         await member.send("Hello, Wanning is testing out the new when2meet bot hahaha :)))")
+        #     except:
+        #         await ctx.send(f"Couldn't DM {member}.")
+        # incomplete = list(set(members) - set(complete))
+        # servers = self._get_servers()
+
+        def _get_servers(self) -> Dict[int, discord.Guild]:
         """
         Gets all the servers the bot is in
 
@@ -25,21 +53,6 @@ class When2Meet(commands.Cog):
         for guild in guilds:
             servers[guild.id] = guild
         return servers
-
-    @commands.command()
-    async def when2meet(self, ctx: commands.Context, url, frequency, *members) -> None:
-        """Reminds members who haven't responded to a when2meet to do so"""
-        await ctx.message.add_reaction("✅")
-        members = list(members)
-        incomplete = list(set(members) - set(complete))
-        servers = self._get_servers()
-        
-        # send dm to incomplete members
-        for user in incomplete:
-            message = "please fill form at " + url + " and respond to the poll"
-            embed = discord.Embed(title="When2Meet", description=message, color=0x00ff00)
-            
-            
     
 def setup(client: commands.Bot) -> None:
     client.add_cog(When2Meet(client))
